@@ -1,0 +1,637 @@
+{% extends "base.html" %}
+
+{% block page_title %}BIST Tests{% endblock %}
+
+{% block content %}
+<div class="bist-container">
+    <div class="bist-header">
+        <h2>Built-In Self Tests (BIST)</h2>
+        <div class="header-controls">
+            <button id="runAllBtn" class="btn-run btn-primary" onclick="runBistTests()">▶ Run All Tests</button>
+            <div class="run-options">
+                <button class="btn-run-small" onclick="runBistTests('endpoints')" title="Test API endpoints only">Endpoints</button>
+                <button class="btn-run-small" onclick="runBistTests('pages')" title="Test dashboard pages only">Pages</button>
+                <button class="btn-run-small" onclick="runBistTests('dependencies')" title="Test external dependencies only">Dependencies</button>
+            </div>
+            <span id="runStatus" class="run-status"></span>
+        </div>
+    </div>
+
+    <div class="bist-tabs">
+        <button class="tab-btn active" onclick="switchTab('endpoints')">API Endpoints</button>
+        <button class="tab-btn" onclick="switchTab('pages')">Dashboard Pages</button>
+        <button class="tab-btn" onclick="switchTab('dependencies')">External Dependencies</button>
+        <button class="tab-btn" onclick="switchTab('summary')">Summary</button>
+    </div>
+
+    <!-- Endpoints Tab -->
+    <div id="endpoints" class="bist-tab-content active">
+        <div id="endpoints-container" class="bist-tests-list">
+            <p class="placeholder">Loading test results...</p>
+        </div>
+    </div>
+
+    <!-- Pages Tab -->
+    <div id="pages" class="bist-tab-content">
+        <div id="pages-container" class="bist-tests-list">
+            <p class="placeholder">Loading test results...</p>
+        </div>
+    </div>
+
+    <!-- Dependencies Tab -->
+    <div id="dependencies" class="bist-tab-content">
+        <div id="dependencies-container" class="bist-tests-list">
+            <p class="placeholder">Loading test results...</p>
+        </div>
+    </div>
+
+    <!-- Summary Tab -->
+    <div id="summary" class="bist-tab-content">
+        <div id="summary-container" class="summary-stats">
+            <p class="placeholder">Loading test summary...</p>
+        </div>
+    </div>
+</div>
+
+<style>
+.bist-container {
+    padding: 0;
+}
+
+.bist-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.bist-header h2 {
+    margin: 0;
+    flex: 1;
+}
+
+.header-controls {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.btn-run {
+    background: #49cc90;
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background 0.2s;
+    white-space: nowrap;
+}
+
+.btn-run:hover {
+    background: #27ae60;
+}
+
+.btn-run:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.btn-run.btn-primary {
+    background: #49cc90;
+    font-weight: 600;
+}
+
+.btn-run.btn-primary:hover {
+    background: #27ae60;
+}
+
+.run-options {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.btn-run-small {
+    background: #3498db;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: background 0.2s;
+}
+
+.btn-run-small:hover {
+    background: #2980b9;
+}
+
+.btn-run-small:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.run-status {
+    color: #666;
+    font-size: 0.9rem;
+    min-width: 150px;
+}
+
+.bist-tabs {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid #ddd;
+}
+
+.tab-btn {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    color: #666;
+    border-bottom: 3px solid transparent;
+    transition: all 0.2s;
+    font-size: 0.95rem;
+}
+
+.tab-btn:hover {
+    color: #333;
+}
+
+.tab-btn.active {
+    color: #49cc90;
+    border-bottom-color: #49cc90;
+}
+
+.bist-tab-content {
+    display: none;
+}
+
+.bist-tab-content.active {
+    display: block;
+}
+
+.bist-tests-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.test-item {
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    padding: 1.5rem;
+    background: white;
+    transition: box-shadow 0.2s;
+}
+
+.test-item:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.test-item.success {
+    border-left: 4px solid #49cc90;
+}
+
+.test-item.failed {
+    border-left: 4px solid #f93e3e;
+}
+
+.test-item.warning {
+    border-left: 4px solid #fca130;
+}
+
+.test-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 0.75rem;
+}
+
+.test-status-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    font-weight: bold;
+    color: white;
+    font-size: 0.8rem;
+}
+
+.test-status-badge.success {
+    background: #49cc90;
+}
+
+.test-status-badge.failed {
+    background: #f93e3e;
+}
+
+.test-status-badge.warning {
+    background: #fca130;
+}
+
+.test-title {
+    flex: 1;
+    font-weight: 600;
+    color: #333;
+}
+
+.test-method {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    background: #f0f0f0;
+    border-radius: 3px;
+    font-family: monospace;
+    font-size: 0.8rem;
+    color: #666;
+}
+
+.test-details {
+    margin-top: 1rem;
+    padding: 1rem;
+    background: #f8f8f8;
+    border-radius: 4px;
+    font-family: monospace;
+    font-size: 0.85rem;
+    color: #666;
+}
+
+.test-details strong {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #333;
+}
+
+.test-error {
+    background: #f8d7da;
+    color: #721c24;
+    padding: 0.75rem;
+    border-radius: 4px;
+    border: 1px solid #f5c6cb;
+    margin-top: 0.75rem;
+}
+
+.summary-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+}
+
+.stat-box {
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    padding: 1.5rem;
+    text-align: center;
+}
+
+.stat-box h3 {
+    margin: 0 0 0.5rem 0;
+    color: #666;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+}
+
+.stat-value {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #333;
+}
+
+.stat-box.success .stat-value {
+    color: #49cc90;
+}
+
+.stat-box.failed .stat-value {
+    color: #f93e3e;
+}
+
+.stat-box.total .stat-value {
+    color: #3498db;
+}
+
+.placeholder {
+    text-align: center;
+    padding: 2rem;
+    color: #999;
+    font-style: italic;
+}
+
+.loading {
+    text-align: center;
+    padding: 2rem;
+    color: #999;
+}
+
+@media (max-width: 768px) {
+    .bist-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .header-controls {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .btn-run {
+        width: 100%;
+    }
+
+    .run-options {
+        flex-direction: column;
+    }
+
+    .btn-run-small {
+        flex: 1;
+    }
+
+    .bist-tabs {
+        flex-wrap: wrap;
+    }
+
+    .tab-btn {
+        flex: 1;
+        min-width: 120px;
+    }
+
+    .test-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
+</style>
+
+<script>
+let currentTab = 'endpoints';
+
+function switchTab(tabName) {
+    // Hide all tabs
+    document.querySelectorAll('.bist-tab-content').forEach(tab => {
+        tab.classList.remove('active');
+    });
+
+    // Remove active class from all buttons
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+
+    // Show selected tab
+    document.getElementById(tabName).classList.add('active');
+
+    // Find and activate the corresponding button
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        if (btn.textContent.toLowerCase().includes(tabName.replace('pages', 'dashboard pages'))) {
+            btn.classList.add('active');
+        }
+    });
+
+    currentTab = tabName;
+}
+
+async function loadBistResults() {
+    try {
+        const response = await fetch('/ui/api/bist-results');
+        const data = await response.json();
+
+        if (!data.success) {
+            showPlaceholder('No test results available. Click "Run Tests" to start.');
+            return;
+        }
+
+        const results = data.results;
+        renderResults(results);
+
+    } catch (error) {
+        console.error('Error loading BIST results:', error);
+        showPlaceholder('Error loading test results');
+    }
+}
+
+function renderResults(results) {
+    // Render endpoints
+    renderEndpoints(results.endpoints);
+
+    // Render pages
+    renderPages(results.dashboard_pages);
+
+    // Render dependencies
+    renderDependencies(results.external_dependencies);
+
+    // Render summary
+    renderSummary(results);
+}
+
+function renderEndpoints(endpoints) {
+    const container = document.getElementById('endpoints-container');
+
+    if (!endpoints || endpoints.length === 0) {
+        container.innerHTML = '<p class="placeholder">No endpoints tested</p>';
+        return;
+    }
+
+    container.innerHTML = endpoints.map(test => {
+        const statusClass = test.success ? 'success' : 'failed';
+        const statusIcon = test.success ? '✓' : '✗';
+
+        return `
+            <div class="test-item ${statusClass}">
+                <div class="test-header">
+                    <span class="test-status-badge ${statusClass}">${statusIcon}</span>
+                    <div class="test-title">${test.method} ${test.route}</div>
+                </div>
+                <div class="test-details">
+                    <strong>Status Code:</strong> ${test.status}
+                    ${test.error ? `<div class="test-error"><strong>Error:</strong> ${escapeHtml(test.error)}</div>` : ''}
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+function renderPages(pages) {
+    const container = document.getElementById('pages-container');
+
+    if (!pages || pages.length === 0) {
+        container.innerHTML = '<p class="placeholder">No pages tested</p>';
+        return;
+    }
+
+    container.innerHTML = pages.map(test => {
+        const statusClass = test.success ? 'success' : (test.missing_elements.length > 0 ? 'warning' : 'failed');
+        const statusIcon = test.success ? '✓' : '!';
+
+        let details = `<strong>Status:</strong> ${test.status}<br>
+                       <strong>Valid HTML:</strong> ${test.html_valid ? 'Yes' : 'No'}`;
+
+        if (test.missing_elements && test.missing_elements.length > 0) {
+            details += `<br><strong>Missing Elements:</strong><br>
+                        ${test.missing_elements.map(e => `• ${escapeHtml(e)}`).join('<br>')}`;
+        }
+
+        return `
+            <div class="test-item ${statusClass}">
+                <div class="test-header">
+                    <span class="test-status-badge ${statusClass}">${statusIcon}</span>
+                    <div class="test-title">${test.page}</div>
+                </div>
+                <div class="test-details">
+                    ${details}
+                    ${test.error ? `<div class="test-error"><strong>Error:</strong> ${escapeHtml(test.error)}</div>` : ''}
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+function renderDependencies(deps) {
+    const container = document.getElementById('dependencies-container');
+
+    if (!deps || deps.length === 0) {
+        container.innerHTML = '<p class="placeholder">No dependencies configured</p>';
+        return;
+    }
+
+    container.innerHTML = deps.map(test => {
+        const statusClass = test.success ? 'success' : 'failed';
+        const statusIcon = test.success ? '✓' : '✗';
+
+        return `
+            <div class="test-item ${statusClass}">
+                <div class="test-header">
+                    <span class="test-status-badge ${statusClass}">${statusIcon}</span>
+                    <div class="test-title">${test.dependency}</div>
+                </div>
+                <div class="test-details">
+                    <strong>Status:</strong> ${test.status}
+                    ${test.error ? `<div class="test-error"><strong>Error:</strong> ${escapeHtml(test.error)}</div>` : ''}
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+function renderSummary(results) {
+    const container = document.getElementById('summary-container');
+
+    const endpoints = results.endpoints || [];
+    const pages = results.dashboard_pages || [];
+    const deps = results.external_dependencies || [];
+
+    const endpointsPassed = endpoints.filter(t => t.success).length;
+    const pagesPassed = pages.filter(t => t.success).length;
+    const depsPassed = deps.filter(t => t.success).length;
+
+    const totalTests = endpoints.length + pages.length + deps.length;
+    const totalPassed = endpointsPassed + pagesPassed + depsPassed;
+    const totalFailed = totalTests - totalPassed;
+
+    container.innerHTML = `
+        <div class="stat-box total">
+            <h3>Total Tests</h3>
+            <div class="stat-value">${totalTests}</div>
+        </div>
+        <div class="stat-box success">
+            <h3>Passed</h3>
+            <div class="stat-value">${totalPassed}</div>
+        </div>
+        <div class="stat-box failed">
+            <h3>Failed</h3>
+            <div class="stat-value">${totalFailed}</div>
+        </div>
+        <div class="stat-box">
+            <h3>Pass Rate</h3>
+            <div class="stat-value">${totalTests > 0 ? Math.round((totalPassed / totalTests) * 100) : 0}%</div>
+        </div>
+        <div class="stat-box">
+            <h3>API Endpoints</h3>
+            <div class="stat-value">${endpointsPassed}/${endpoints.length}</div>
+        </div>
+        <div class="stat-box">
+            <h3>Dashboard Pages</h3>
+            <div class="stat-value">${pagesPassed}/${pages.length}</div>
+        </div>
+        <div class="stat-box">
+            <h3>Dependencies</h3>
+            <div class="stat-value">${depsPassed}/${deps.length}</div>
+        </div>
+    `;
+}
+
+async function runBistTests(testType = 'all') {
+    const runAllBtn = document.getElementById('runAllBtn');
+    const statusEl = document.getElementById('runStatus');
+
+    // Disable all run buttons
+    document.querySelectorAll('.btn-run, .btn-run-small').forEach(btn => {
+        btn.disabled = true;
+    });
+
+    let statusText = 'Running tests...';
+    if (testType !== 'all') {
+        statusText = `Running ${testType} tests...`;
+    }
+    statusEl.textContent = statusText;
+
+    try {
+        const response = await fetch('/ui/api/bist-run', {
+            method: 'POST'
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        if (data.success) {
+            statusEl.textContent = '✓ Tests completed';
+
+            // If selective test type, switch to that tab
+            if (testType !== 'all') {
+                switchTab(testType);
+            }
+
+            renderResults(data.results);
+        } else {
+            throw new Error(data.error || 'Unknown error');
+        }
+
+    } catch (error) {
+        console.error('Error running BIST tests:', error);
+        statusEl.textContent = '✗ Error running tests';
+    } finally {
+        // Re-enable all run buttons
+        document.querySelectorAll('.btn-run, .btn-run-small').forEach(btn => {
+            btn.disabled = false;
+        });
+    }
+}
+
+function showPlaceholder(message) {
+    document.getElementById('endpoints-container').innerHTML = `<p class="placeholder">${message}</p>`;
+    document.getElementById('pages-container').innerHTML = `<p class="placeholder">${message}</p>`;
+    document.getElementById('dependencies-container').innerHTML = `<p class="placeholder">${message}</p>`;
+    document.getElementById('summary-container').innerHTML = `<p class="placeholder">${message}</p>`;
+}
+
+function escapeHtml(text) {
+    const map = {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#039;'
+    };
+    return text.replace(/[&<>"']/g, m => map[m]);
+}
+
+// Load results on page load
+document.addEventListener('DOMContentLoaded', loadBistResults);
+</script>
+{% endblock %}

@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block page_title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="dashboard-grid">
+    <div class="stat-card">
+        <h3>Server Status</h3>
+        <p class="stat-value">Running</p>
+        <p class="stat-label">✓ Healthy</p>
+    </div>
+
+    <div class="stat-card">
+        <h3>Root Port</h3>
+        <p class="stat-value">{{ config.run_details.root_port }}</p>
+        <p class="stat-label">Base port for services</p>
+    </div>
+
+    <div class="stat-card">
+        <h3>API Port</h3>
+        <p class="stat-value">{{ config.run_details.root_port + config.run_details.port_offsets.api }}</p>
+        <p class="stat-label">API endpoint port</p>
+    </div>
+
+    <div class="stat-card">
+        <h3>Docker Image</h3>
+        <p class="stat-value">{{ config.run_details.docker_image }}</p>
+        <p class="stat-label">Container image</p>
+    </div>
+</div>
+
+<div class="info-section">
+    <h2>Quick Links</h2>
+    <ul>
+        <li><a href="http://localhost:{{ config.run_details.root_port + config.run_details.port_offsets.api }}/api/health" target="_blank">Health Check API</a></li>
+        <li><a href="{{ url_for('ui.api_docs') }}">API Documentation</a></li>
+        <li><a href="{{ url_for('ui.events') }}">Recent Events</a></li>
+    </ul>
+</div>
+
+<div class="info-section">
+    <h2>Configuration</h2>
+    <pre><code>{{ config | tojson(indent=2) }}</code></pre>
+</div>
+{% endblock %}

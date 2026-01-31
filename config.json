@@ -1,0 +1,33 @@
+{
+    "run_details": {
+        "root_port": 8000,
+        "local_storage_folder": "./storage",
+        "pid_file": "./storage/server.pid",
+        "docker_image": "my-server:latest",
+        "port_offsets": {
+            "dashboard": 0,
+            "api": 1
+        }
+    },
+    "external_dependencies": {
+    },
+    "api_details": {
+        "routes": {
+            "health_check": {
+                "route": "/api/health",
+                "method": "GET",
+                "function": "health_check",
+                "function_file_relative_path": "functions/health.py",
+                "input": [],
+                "expected_output": [
+                    {
+                        "status": {
+                            "type": "str",
+                            "required": true
+                        }
+                    }
+                ]
+            }
+        }
+    }
+}

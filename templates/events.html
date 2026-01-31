@@ -1,0 +1,295 @@
+{% extends "base.html" %}
+
+{% block page_title %}Events{% endblock %}
+
+{% block content %}
+<div class="events-container-main">
+    <div class="events-header">
+        <h2>Recent Server Events</h2>
+        <button id="refreshBtn" class="btn-refresh" onclick="refreshEvents()">🔄 Refresh</button>
+        <span id="lastRefresh" class="last-refresh">Loading...</span>
+    </div>
+
+    <p class="events-description">Last 100 API calls with request and response details</p>
+
+    <div id="events-container" class="events-container">
+        <p class="loading">Loading events...</p>
+    </div>
+</div>
+
+<script>
+async function loadEvents() {
+    const container = document.getElementById('events-container');
+    const lastRefreshEl = document.getElementById('lastRefresh');
+
+    try {
+        const response = await fetch('/ui/api/events');
+        const data = await response.json();
+
+        if (!data.events || data.events.length === 0) {
+            container.innerHTML = '<div class="empty-state"><p>No events yet</p></div>';
+            lastRefreshEl.textContent = 'Last refresh: ' + new Date().toLocaleTimeString();
+            return;
+        }
+
+        container.innerHTML = '';
+
+        data.events.forEach(event => {
+            const timestamp = new Date(event.timestamp);
+            const isError = !event.success;
+            const statusClass = isError ? 'error' : 'success';
+
+            const eventEl = document.createElement('div');
+            eventEl.className = 'event-item';
+            eventEl.innerHTML = `
+                <div class="event-header">
+                    <span class="event-method ${event.method.toLowerCase()}">${event.method}</span>
+                    <span class="event-route">${event.route}</span>
+                    <span class="event-status ${statusClass}">${event.status}</span>
+                    <span class="event-time">${timestamp.toLocaleString()}</span>
+                </div>
+
+                <div class="event-details">
+                    <div class="event-input">
+                        <strong>Input:</strong>
+                        <pre><code>${JSON.stringify(event.input, null, 2)}</code></pre>
+                    </div>
+                    <div class="event-output">
+                        <strong>Output:</strong>
+                        <pre><code>${JSON.stringify(event.output, null, 2)}</code></pre>
+                    </div>
+                </div>
+            `;
+            container.appendChild(eventEl);
+        });
+
+        lastRefreshEl.innerHTML = `<span class="refresh-indicator"></span>Last refresh: ${new Date().toLocaleTimeString()}`;
+
+    } catch (error) {
+        container.innerHTML = `<div class="empty-state"><p>Error loading events: ${error.message}</p></div>`;
+        lastRefreshEl.textContent = 'Error loading events';
+    }
+}
+
+function refreshEvents() {
+    const btn = document.getElementById('refreshBtn');
+    btn.disabled = true;
+    btn.style.opacity = '0.6';
+
+    loadEvents().finally(() => {
+        btn.disabled = false;
+        btn.style.opacity = '1';
+    });
+}
+
+// Load events on page load
+document.addEventListener('DOMContentLoaded', () => {
+    loadEvents();
+    // Auto-refresh every 5 seconds
+    setInterval(loadEvents, 5000);
+});
+</script>
+
+<style>
+.events-container-main {
+    padding: 0;
+}
+
+.events-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.events-header h2 {
+    margin: 0;
+    flex: 1;
+}
+
+.btn-refresh {
+    background: #3498db;
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background 0.2s;
+    white-space: nowrap;
+}
+
+.btn-refresh:hover {
+    background: #2980b9;
+}
+
+.btn-refresh:active {
+    transform: scale(0.98);
+}
+
+.btn-refresh:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.last-refresh {
+    color: #666;
+    font-size: 0.9rem;
+    white-space: nowrap;
+}
+
+.events-description {
+    color: #666;
+    margin-bottom: 1.5rem;
+    font-size: 0.95rem;
+}
+
+.events-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.event-item {
+    border: 1px solid #ddd;
+    margin-bottom: 0;
+    border-radius: 8px;
+    overflow: hidden;
+    background: white;
+    transition: box-shadow 0.2s;
+}
+
+.event-item:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.event-header {
+    background: #f5f5f5;
+    padding: 1rem;
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.event-method {
+    font-weight: bold;
+    padding: 0.25rem 0.5rem;
+    border-radius: 3px;
+    color: white;
+    min-width: 50px;
+    text-align: center;
+}
+
+.event-method.get { background: #61affe; }
+.event-method.post { background: #49cc90; }
+.event-method.put { background: #fca130; }
+.event-method.delete { background: #f93e3e; }
+
+.event-route {
+    font-family: 'Monaco', 'Courier New', monospace;
+    color: #333;
+    flex: 1;
+    min-width: 150px;
+    word-break: break-all;
+}
+
+.event-status {
+    padding: 0.25rem 0.5rem;
+    border-radius: 3px;
+    color: white;
+    font-weight: bold;
+}
+
+.event-status.success { background: #49cc90; }
+.event-status.error { background: #f93e3e; }
+
+.event-time {
+    color: #999;
+    font-size: 0.85rem;
+    white-space: nowrap;
+}
+
+.event-details {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    padding: 1rem;
+}
+
+.event-input, .event-output {
+    overflow-x: auto;
+}
+
+.event-input pre, .event-output pre {
+    background: #f8f8f8;
+    padding: 0.5rem;
+    border-radius: 3px;
+    font-size: 0.85rem;
+    margin: 0.5rem 0 0 0;
+}
+
+.event-input strong, .event-output strong {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #2c3e50;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 2rem;
+    color: #999;
+}
+
+.loading {
+    text-align: center;
+    padding: 2rem;
+    color: #999;
+}
+
+.refresh-indicator {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #49cc90;
+    margin-right: 0.5rem;
+    animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+}
+
+@media (max-width: 768px) {
+    .events-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .events-header h2 {
+        flex: none;
+    }
+
+    .btn-refresh {
+        flex: 1;
+    }
+
+    .event-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .event-details {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+{% endblock %}
