@@ -13,11 +13,24 @@
             <h2>Server</h2>
         </div>
         <nav class="sidebar-nav">
-            <a href="{{ url_for('ui.main') }}" class="nav-link">Dashboard</a>
-            <a href="{{ url_for('ui.events') }}" class="nav-link">Events</a>
-            <a href="{{ url_for('ui.api_docs') }}" class="nav-link">API Docs</a>
-            <a href="{{ url_for('ui.bist_dashboard') }}" class="nav-link">BIST Tests</a>
-            <a href="{{ url_for('ui.docs') }}" class="nav-link">📚 Docs Manager</a>
+            <!-- Overview Section -->
+            <div class="nav-section">
+                <a href="{{ url_for('ui.main') }}" class="nav-link nav-main">📊 Dashboard</a>
+            </div>
+
+            <!-- Monitoring Section -->
+            <div class="nav-section">
+                <div class="nav-section-title">Monitoring</div>
+                <a href="{{ url_for('ui.events') }}" class="nav-link nav-sub">📈 Events</a>
+            </div>
+
+            <!-- Tools Section -->
+            <div class="nav-section">
+                <div class="nav-section-title">Tools</div>
+                <a href="{{ url_for('ui.api_docs') }}" class="nav-link nav-sub">🔌 API Docs</a>
+                <a href="{{ url_for('ui.docs') }}" class="nav-link nav-sub">📚 Documentation</a>
+                <a href="{{ url_for('ui.bist_dashboard') }}" class="nav-link nav-sub">✓ Verify (Tests)</a>
+            </div>
         </nav>
     </div>
 

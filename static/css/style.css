@@ -38,16 +38,44 @@ body {
     gap: 0.5rem;
 }
 
+.nav-section {
+    margin-bottom: 1.5rem;
+}
+
+.nav-section-title {
+    padding: 0.75rem 1rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: #95a5a6;
+    letter-spacing: 0.5px;
+}
+
 .nav-link {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
     padding: 0.75rem 1rem;
     border-radius: 4px;
     text-decoration: none;
     color: white;
-    transition: background 0.2s;
+    transition: all 0.2s;
+    font-size: 0.95rem;
+}
+
+.nav-link.nav-main {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.nav-link.nav-sub {
+    padding-left: 1.5rem;
+    font-size: 0.9rem;
 }
 
 .nav-link:hover {
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.15);
+    transform: translateX(2px);
 }
 
 .main-content {
