@@ -189,8 +189,4 @@ body {
     .dashboard-grid {
         grid-template-columns: 1fr;
     }
-
-    .endpoint-split {
-        grid-template-columns: 1fr;
-    }
 }
