@@ -4,5 +4,5 @@
 
 // Initialize page on load
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('Dashboard loaded');
+    // Dashboard initialized
 });
