@@ -69,8 +69,8 @@ function displayEvents(events) {
     }
 
     const html = events.map(event => {
-        const timestamp = new Date(event.timestamp * 1000);
-        const statusClass = event.status === 'success' ? 'success' : event.status === 'error' ? 'error' : 'pending';
+        const timestamp = new Date(event.timestamp);
+        const statusClass = event.success ? 'success' : 'error';
 
         return `
             <div class="event-item">
@@ -81,8 +81,14 @@ function displayEvents(events) {
                     <span class="event-time">${timestamp.toLocaleString()}</span>
                 </div>
                 <div class="event-details">
-                    <div><strong>Status:</strong> ${event.status_code}</div>
-                    ${event.response_size ? `<div><strong>Size:</strong> ${event.response_size} bytes</div>` : ''}
+                    <div class="event-input">
+                        <strong>Input:</strong>
+                        <pre><code>${JSON.stringify(event.input, null, 2)}</code></pre>
+                    </div>
+                    <div class="event-output">
+                        <strong>Output:</strong>
+                        <pre><code>${JSON.stringify(event.output, null, 2)}</code></pre>
+                    </div>
                 </div>
             </div>
         `;

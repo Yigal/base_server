@@ -18,75 +18,32 @@
 </div>
 
 <script>
-async function loadEvents() {
-    const container = document.getElementById('events-container');
-    const lastRefreshEl = document.getElementById('lastRefresh');
-
-    try {
-        const response = await fetch('/ui/api/events');
-        const data = await response.json();
-
-        if (!data.events || data.events.length === 0) {
-            container.innerHTML = '<div class="empty-state"><p>No events yet</p></div>';
-            lastRefreshEl.textContent = 'Last refresh: ' + new Date().toLocaleTimeString();
-            return;
-        }
-
-        container.innerHTML = '';
-
-        data.events.forEach(event => {
-            const timestamp = new Date(event.timestamp);
-            const isError = !event.success;
-            const statusClass = isError ? 'error' : 'success';
-
-            const eventEl = document.createElement('div');
-            eventEl.className = 'event-item';
-            eventEl.innerHTML = `
-                <div class="event-header">
-                    <span class="event-method ${event.method.toLowerCase()}">${event.method}</span>
-                    <span class="event-route">${event.route}</span>
-                    <span class="event-status ${statusClass}">${event.status}</span>
-                    <span class="event-time">${timestamp.toLocaleString()}</span>
-                </div>
-
-                <div class="event-details">
-                    <div class="event-input">
-                        <strong>Input:</strong>
-                        <pre><code>${JSON.stringify(event.input, null, 2)}</code></pre>
-                    </div>
-                    <div class="event-output">
-                        <strong>Output:</strong>
-                        <pre><code>${JSON.stringify(event.output, null, 2)}</code></pre>
-                    </div>
-                </div>
-            `;
-            container.appendChild(eventEl);
-        });
-
-        lastRefreshEl.innerHTML = `<span class="refresh-indicator"></span>Last refresh: ${new Date().toLocaleTimeString()}`;
-
-    } catch (error) {
-        container.innerHTML = `<div class="empty-state"><p>Error loading events: ${error.message}</p></div>`;
-        lastRefreshEl.textContent = 'Error loading events';
-    }
-}
-
-function refreshEvents() {
-    const btn = document.getElementById('refreshBtn');
-    btn.disabled = true;
-    btn.style.opacity = '0.6';
-
-    loadEvents().finally(() => {
-        btn.disabled = false;
-        btn.style.opacity = '1';
-    });
-}
-
 // Load events on page load
-document.addEventListener('DOMContentLoaded', () => {
-    loadEvents();
+document.addEventListener('DOMContentLoaded', async () => {
+    try {
+        const data = await loadEvents();
+        if (data && data.events) {
+            displayEvents(data.events);
+            document.getElementById('lastRefresh').textContent = 'Last refresh: ' + new Date().toLocaleTimeString();
+        }
+    } catch (error) {
+        console.error('Error loading events:', error);
+        showError('events-container', `Failed to load events: ${error.message}`);
+    }
+
     // Auto-refresh every 5 seconds
-    setInterval(loadEvents, 5000);
+    setInterval(async () => {
+        try {
+            const data = await loadEvents();
+            if (data && data.events) {
+                displayEvents(data.events);
+                document.getElementById('lastRefresh').innerHTML =
+                    `<span class="refresh-indicator"></span>Last refresh: ${new Date().toLocaleTimeString()}`;
+            }
+        } catch (error) {
+            console.error('Auto-refresh error:', error);
+        }
+    }, 5000);
 });
 </script>
 {% endblock %}
