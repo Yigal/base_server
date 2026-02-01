@@ -107,25 +107,10 @@ def create_ui_blueprint(config: Dict[str, Any]) -> Blueprint:
         except Exception as e:
             return jsonify({'success': False, 'error': str(e)}), 500
 
-    @ui.route('/documentation')
-    def documentation():
-        """Project documentation page with folder dropdown and sidebar."""
-        return render_template('documentation.html', config=config)
-
     @ui.route('/docs')
     def docs():
         """Documentation manager page with folder dropdown and refresh."""
         return render_template('docs.html', config=config)
-
-    @ui.route('/agents')
-    def agents():
-        """Agents and skills browser page."""
-        return render_template('agents.html', config=config)
-
-    @ui.route('/agent-skills')
-    def agent_skills():
-        """Agents and skills hierarchy page."""
-        return render_template('agent-skills.html', config=config)
 
     @ui.route('/api/documentation-folders')
     def get_documentation_folders():
