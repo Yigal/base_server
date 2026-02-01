@@ -16,7 +16,7 @@ from importlib import import_module
 from typing import Callable
 
 from flask import Flask, request, jsonify, redirect
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
@@ -114,10 +114,15 @@ def register_fastapi_routes(app: FastAPI, config: dict, flask_app: Flask):
 
             # Create a wrapper that logs events
             def create_wrapper(fn, route_cfg):
-                async def wrapper(body: dict = None):
+                async def wrapper(http_request: Request, body: dict = None):
                     try:
-                        # Call function with Flask app context
-                        with flask_app.app_context():
+                        # Build query string from FastAPI request
+                        from urllib.parse import urlencode
+                        query_params = dict(http_request.query_params)
+                        query_string = urlencode(query_params) if query_params else ""
+
+                        # Call function with Flask app context and query parameters
+                        with flask_app.test_request_context('/?{}'.format(query_string)):
                             response, status = fn()
                             # Extract JSON from Flask response
                             response_data = response.get_json() if hasattr(response, 'get_json') else response
@@ -125,7 +130,7 @@ def register_fastapi_routes(app: FastAPI, config: dict, flask_app: Flask):
                         log_event(
                             route=route_cfg.get('route'),
                             method=route_cfg.get('method'),
-                            input_data=body or {},
+                            input_data=body or query_params or {},
                             output_data=response_data,
                             status=status,
                             success=(status >= 200 and status < 300)
@@ -136,7 +141,7 @@ def register_fastapi_routes(app: FastAPI, config: dict, flask_app: Flask):
                         log_event(
                             route=route_cfg.get('route'),
                             method=route_cfg.get('method'),
-                            input_data=body or {},
+                            input_data=body or dict(http_request.query_params) or {},
                             output_data=error_response,
                             status=500,
                             success=False

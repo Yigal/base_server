@@ -35,6 +35,7 @@ def run_bist() -> Dict[str, Any]:
         'endpoints': [],
         'dashboard_pages': [],
         'external_dependencies': [],
+        'documentation_folders': [],
         'timestamp': str(Path.cwd())
     }
 
@@ -46,6 +47,9 @@ def run_bist() -> Dict[str, Any]:
 
     # Test external dependencies
     test_external_dependencies(config, results)
+
+    # Test documentation folders
+    test_documentation_folders(config, results)
 
     # Save results
     results_dir = Path('results')
@@ -111,27 +115,29 @@ def _test_single_endpoint(api_port: int, route: str, method: str, results: Dict[
 def test_dashboard_pages(config: Dict[str, Any], results: Dict[str, Any]) -> None:
     """Test all dashboard pages for proper HTML structure."""
     root_port = config.get('run_details', {}).get('root_port', 8000)
+    dashboard_offset = config.get('run_details', {}).get('port_offsets', {}).get('dashboard', 0)
+    dashboard_port = root_port + dashboard_offset
 
     # Define dashboard pages to test
     pages = [
         {
             'name': 'Main Dashboard',
-            'url': f'http://localhost:{root_port}/ui/',
+            'url': f'http://localhost:{dashboard_port}/ui/',
             'required_elements': ['<html', '<head', '<title', '<body', 'Dashboard', 'stat-card']
         },
         {
             'name': 'Events',
-            'url': f'http://localhost:{root_port}/ui/events',
+            'url': f'http://localhost:{dashboard_port}/ui/events',
             'required_elements': ['<html', '<head', '<title', '<body', 'Recent Server Events', 'events-container']
         },
         {
             'name': 'API Documentation',
-            'url': f'http://localhost:{root_port}/ui/api-docs',
+            'url': f'http://localhost:{dashboard_port}/ui/api-docs',
             'required_elements': ['<html', '<head', '<title', '<body', 'API Documentation', 'docsContainer', 'sourceContainer']
         },
         {
             'name': 'BIST Tests',
-            'url': f'http://localhost:{root_port}/ui/bist',
+            'url': f'http://localhost:{dashboard_port}/ui/bist',
             'required_elements': ['<html', '<head', '<title', '<body', 'BIST Tests', 'runAllBtn', 'bist-tabs']
         }
     ]
@@ -197,3 +203,79 @@ def test_external_dependencies(config: Dict[str, Any], results: Dict[str, Any]) 
             }
 
         results['external_dependencies'].append(test_result)
+
+
+def test_documentation_folders(config: Dict[str, Any], results: Dict[str, Any]) -> None:
+    """Test documentation folders structure and required files."""
+    doc_base_path = Path('documentation')
+
+    if not doc_base_path.exists():
+        results['documentation_folders'].append({
+            'folder': 'documentation',
+            'success': False,
+            'error': 'documentation folder not found'
+        })
+        return
+
+    # Define required files for each documentation folder
+    base_server_keypoint_required = [
+        'base_server_keypoints_full.json',
+        'base_server_keypoints_summary.json',
+        'html_generator.py',
+        'schemas/base_server_keypoints_full.schema.json',
+        'schemas/base_server_keypoints_summary.schema.json',
+    ]
+
+    documentation_creation_required = [
+        'documentation_creation_guidelines.md',
+        'agent.md',
+        'skills.md',
+        'schemas/documentation_creation_guidelines_full.schema.json',
+        'schemas/documentation_creation_guidelines_summary.schema.json',
+        'schemas/skills.schema.json',
+    ]
+
+    # Test base_server_keypoint folder
+    _test_documentation_folder(
+        doc_base_path / 'base_server_keypoint',
+        'base_server_keypoint',
+        base_server_keypoint_required,
+        results
+    )
+
+    # Test documentation_creation folder
+    _test_documentation_folder(
+        doc_base_path / 'documentation_creation',
+        'documentation_creation',
+        documentation_creation_required,
+        results
+    )
+
+
+def _test_documentation_folder(folder_path: Path, folder_name: str, required_files: List[str], results: Dict[str, Any]) -> None:
+    """Test a single documentation folder."""
+    missing_files = []
+
+    if not folder_path.exists():
+        test_result = {
+            'folder': folder_name,
+            'path': str(folder_path),
+            'success': False,
+            'error': f'Folder {folder_name} not found'
+        }
+    else:
+        for required_file in required_files:
+            file_path = folder_path / required_file
+            if not file_path.exists():
+                missing_files.append(required_file)
+
+        test_result = {
+            'folder': folder_name,
+            'path': str(folder_path),
+            'success': len(missing_files) == 0,
+            'files_checked': len(required_files),
+            'files_found': len(required_files) - len(missing_files),
+            'missing_files': missing_files if missing_files else []
+        }
+
+    results['documentation_folders'].append(test_result)

@@ -34,12 +34,369 @@
     <ul>
         <li><a href="http://localhost:{{ config.run_details.root_port + config.run_details.port_offsets.api }}/api/health" target="_blank">Health Check API</a></li>
         <li><a href="{{ url_for('ui.api_docs') }}">API Documentation</a></li>
+        <li><a href="{{ url_for('ui.agents') }}">📋 Agent Files</a></li>
+        <li><a href="{{ url_for('ui.agent_skills') }}">🌳 Skills Tree</a></li>
         <li><a href="{{ url_for('ui.events') }}">Recent Events</a></li>
     </ul>
+</div>
+
+<!-- Documentation Viewer Section -->
+<div class="info-section">
+    <h2>📚 Project Documentation</h2>
+    <div id="documentation-container" class="documentation-viewer">
+        <div class="doc-controls">
+            <div class="doc-selector">
+                <label for="doc-folder">Documentation Folder:</label>
+                <select id="doc-folder" onchange="loadDocument()">
+                    <option value="">Loading folders...</option>
+                </select>
+            </div>
+            <div class="doc-selector">
+                <label for="doc-format">View Format:</label>
+                <select id="doc-format" onchange="loadDocument()">
+                    <option value="summary_markdown">Summary (Markdown)</option>
+                    <option value="full_markdown">Full (Markdown)</option>
+                    <option value="summary_json">Summary (JSON)</option>
+                    <option value="full_json">Full (JSON)</option>
+                </select>
+            </div>
+            <div class="doc-actions">
+                <button onclick="toggleDocView('compact')" class="doc-btn">Compact</button>
+                <button onclick="toggleDocView('expanded')" class="doc-btn">Expanded</button>
+                <button onclick="downloadDocument()" class="doc-btn">Download</button>
+            </div>
+        </div>
+        <div id="doc-content" class="doc-content">
+            <p class="loading">Loading documentation...</p>
+        </div>
+    </div>
 </div>
 
 <div class="info-section">
     <h2>Configuration</h2>
     <pre><code>{{ config | tojson(indent=2) }}</code></pre>
 </div>
+
+<script>
+// Document loading functionality
+let currentDocFormat = 'summary_markdown';
+let currentDocContent = null;
+let availableFolders = [];
+let documentNames = {}; // Map folder names to document names
+
+// Load documentation folders on page load
+async function initializeDocumentationFolders() {
+    try {
+        const response = await fetch('/ui/api/documentation-folders');
+        const data = await response.json();
+
+        if (data.success) {
+            availableFolders = data.folders;
+            populateFolderDropdown();
+        } else {
+            console.error('Failed to load folders:', data.error);
+        }
+    } catch (error) {
+        console.error('Error loading documentation folders:', error);
+    }
+}
+
+function populateFolderDropdown() {
+    const folderSelect = document.getElementById('doc-folder');
+    folderSelect.innerHTML = '';
+
+    availableFolders.forEach(folder => {
+        const option = document.createElement('option');
+        option.value = folder.name;
+        option.textContent = folder.display_name;
+        folderSelect.appendChild(option);
+
+        // Store document names for this folder
+        const docNames = new Set();
+        folder.files.markdown.forEach(f => {
+            // Extract document name from filename (remove extensions)
+            const docName = f.replace(/(_summary)?\.md$/, '').replace(/_/g, ' ');
+            docNames.add(docName);
+        });
+        folder.files.json.forEach(f => {
+            const docName = f.replace(/(_summary|_full)?\.json$/, '').replace(/_/g, ' ');
+            docNames.add(docName);
+        });
+        documentNames[folder.name] = Array.from(docNames)[0] || 'document';
+    });
+
+    // Set first folder as default
+    if (availableFolders.length > 0) {
+        folderSelect.value = availableFolders[0].name;
+        loadDocument();
+    }
+}
+
+async function loadDocument() {
+    const folder = document.getElementById('doc-folder').value;
+    const format = document.getElementById('doc-format').value;
+    currentDocFormat = format;
+
+    if (!folder) {
+        return;
+    }
+
+    const contentDiv = document.getElementById('doc-content');
+    contentDiv.innerHTML = '<p class="loading">Loading documentation...</p>';
+
+    try {
+        const documentName = documentNames[folder] || folder.replace(/_/g, ' ');
+        const response = await fetch(
+            `/ui/api/document?folder=${encodeURIComponent(folder)}&document=${encodeURIComponent(documentName)}&format=${encodeURIComponent(format)}`
+        );
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        if (!data.success) {
+            contentDiv.innerHTML = `<p class="error">Error: ${data.error}</p>`;
+            return;
+        }
+
+        currentDocContent = data.content;
+        displayDocument(data.content, data.file_type);
+
+    } catch (error) {
+        contentDiv.innerHTML = `<p class="error">Failed to load document: ${error.message}</p>`;
+        console.error('Document loading error:', error);
+    }
+}
+
+function displayDocument(content, fileType) {
+    const contentDiv = document.getElementById('doc-content');
+
+    if (fileType === 'json' && typeof content === 'object') {
+        contentDiv.innerHTML = renderJSON(content);
+    } else {
+        // For markdown, display as pre-formatted text with basic styling
+        const escapedContent = String(content)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;');
+        contentDiv.innerHTML = `<pre class="doc-markdown">${escapedContent}</pre>`;
+    }
+}
+
+function renderJSON(obj, depth = 0) {
+    if (depth > 10) return '<span class="json-truncated">...</span>';
+
+    if (Array.isArray(obj)) {
+        return `<details class="json-array" ${depth === 0 ? 'open' : ''}>
+            <summary class="json-summary">[${obj.length} items]</summary>
+            <div class="json-content">
+                ${obj.map((item, i) => `<div class="json-item">[${i}]: ${renderJSON(item, depth + 1)}</div>`).join('')}
+            </div>
+        </details>`;
+    }
+
+    if (obj !== null && typeof obj === 'object') {
+        const keys = Object.keys(obj);
+        return `<details class="json-object" ${depth === 0 ? 'open' : ''}>
+            <summary class="json-summary">{${keys.length} properties}</summary>
+            <div class="json-content">
+                ${keys.map(key => `
+                    <div class="json-property">
+                        <span class="json-key">"${key}":</span>
+                        ${renderJSON(obj[key], depth + 1)}
+                    </div>
+                `).join('')}
+            </div>
+        </details>`;
+    }
+
+    if (typeof obj === 'string') return `<span class="json-string">"${obj}"</span>`;
+    if (typeof obj === 'number') return `<span class="json-number">${obj}</span>`;
+    if (typeof obj === 'boolean') return `<span class="json-boolean">${obj}</span>`;
+    if (obj === null) return '<span class="json-null">null</span>';
+
+    return String(obj);
+}
+
+function toggleDocView(view) {
+    const contentDiv = document.getElementById('doc-content');
+    if (view === 'compact') {
+        contentDiv.style.maxHeight = '400px';
+        contentDiv.style.overflow = 'auto';
+    } else {
+        contentDiv.style.maxHeight = 'none';
+        contentDiv.style.overflow = 'visible';
+    }
+}
+
+function downloadDocument() {
+    if (!currentDocContent) {
+        alert('No document loaded');
+        return;
+    }
+
+    const folder = document.getElementById('doc-folder').value;
+    const fileType = currentDocFormat.includes('json') ? 'json' : 'md';
+    const fileName = `${folder}_${currentDocFormat}.${fileType}`;
+    const content = typeof currentDocContent === 'object'
+        ? JSON.stringify(currentDocContent, null, 2)
+        : currentDocContent;
+
+    const blob = new Blob([content], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = fileName;
+    a.click();
+    URL.revokeObjectURL(url);
+}
+
+// Load initial documentation on page load
+document.addEventListener('DOMContentLoaded', function() {
+    initializeDocumentationFolders();
+});
+</script>
+
+<style>
+.documentation-viewer {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 20px;
+    background: #f9f9f9;
+    margin-top: 15px;
+}
+
+.doc-controls {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.doc-selector {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.doc-selector select {
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.doc-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.doc-btn {
+    padding: 8px 16px;
+    background: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.doc-btn:hover {
+    background: #0056b3;
+}
+
+.doc-content {
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 20px;
+    max-height: 600px;
+    overflow-y: auto;
+    font-family: 'Courier New', monospace;
+    font-size: 13px;
+}
+
+.doc-markdown {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    margin: 0;
+}
+
+.loading, .error {
+    text-align: center;
+    padding: 20px;
+    color: #666;
+}
+
+.error {
+    color: #d32f2f;
+}
+
+/* JSON styling */
+.json-array, .json-object {
+    margin-left: 20px;
+    margin-top: 5px;
+}
+
+.json-summary {
+    cursor: pointer;
+    user-select: none;
+    color: #0066cc;
+}
+
+.json-summary:hover {
+    text-decoration: underline;
+}
+
+.json-content {
+    margin-left: 10px;
+    margin-top: 5px;
+}
+
+.json-property {
+    margin: 5px 0;
+}
+
+.json-key {
+    color: #d73a49;
+    font-weight: bold;
+}
+
+.json-string {
+    color: #24292e;
+}
+
+.json-number {
+    color: #005cc5;
+}
+
+.json-boolean {
+    color: #d73a49;
+}
+
+.json-null {
+    color: #6f42c1;
+}
+
+.json-truncated {
+    color: #999;
+    font-style: italic;
+}
+
+@media (max-width: 768px) {
+    .doc-controls {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .doc-content {
+        max-height: 400px;
+        font-size: 12px;
+    }
+}
+</style>
+
 {% endblock %}

@@ -1,6 +1,6 @@
 {
     "run_details": {
-        "root_port": 8000,
+        "root_port": 4020,
         "local_storage_folder": "./storage",
         "pid_file": "./storage/server.pid",
         "docker_image": "my-server:latest",
@@ -23,6 +23,118 @@
                     {
                         "status": {
                             "type": "str",
+                            "required": true
+                        }
+                    }
+                ]
+            },
+            "documentation": {
+                "route": "/ui/documentation",
+                "method": "GET",
+                "function": "documentation",
+                "function_file_relative_path": "ui/dashboard.py",
+                "input": [],
+                "expected_output": [
+                    {
+                        "html": {
+                            "type": "string",
+                            "required": true
+                        }
+                    }
+                ]
+            },
+            "get_documents": {
+                "route": "/api/documents",
+                "method": "GET",
+                "function": "get_documents",
+                "function_file_relative_path": "functions/documents.py",
+                "input": [],
+                "expected_output": [
+                    {
+                        "documents": {
+                            "type": "array",
+                            "required": true
+                        }
+                    }
+                ]
+            },
+            "get_document_content": {
+                "route": "/api/document",
+                "method": "GET",
+                "function": "get_document_content",
+                "function_file_relative_path": "functions/documents.py",
+                "input": [
+                    {
+                        "folder": {
+                            "type": "str",
+                            "required": true,
+                            "description": "Document folder name"
+                        }
+                    },
+                    {
+                        "document": {
+                            "type": "str",
+                            "required": true,
+                            "description": "Document name"
+                        }
+                    },
+                    {
+                        "format": {
+                            "type": "str",
+                            "required": true,
+                            "description": "Format: full_markdown, summary_markdown, full_json, summary_json"
+                        }
+                    }
+                ],
+                "expected_output": [
+                    {
+                        "content": {
+                            "type": "string or object",
+                            "required": true
+                        }
+                    }
+                ]
+            },
+            "get_agents_file_names": {
+                "route": "/api/agents",
+                "method": "GET",
+                "function": "get_agents_file_names",
+                "function_file_relative_path": "functions/agents.py",
+                "input": [],
+                "expected_output": [
+                    {
+                        "agents": {
+                            "type": "array",
+                            "required": true
+                        }
+                    }
+                ]
+            },
+            "get_agent_file": {
+                "route": "/api/agent",
+                "method": "GET",
+                "function": "get_agent_file",
+                "function_file_relative_path": "functions/agents.py",
+                "input": [
+                    {
+                        "agent": {
+                            "type": "str",
+                            "required": true,
+                            "description": "Agent folder name (e.g., 'code_quality_agent')"
+                        }
+                    },
+                    {
+                        "file_type": {
+                            "type": "str",
+                            "required": true,
+                            "description": "File type: 'agent' or 'skills'"
+                        }
+                    }
+                ],
+                "expected_output": [
+                    {
+                        "content": {
+                            "type": "string",
                             "required": true
                         }
                     }

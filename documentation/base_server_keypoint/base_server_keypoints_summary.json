@@ -1,0 +1,412 @@
+{
+  "project": "Base Server Project Keypoints",
+  "description": "Quick reference summaries for building projects based on the base_server template",
+  "version": "1.0.0",
+  "sections": [
+    {
+      "id": 1,
+      "name": "Configuration Management",
+      "keypoints": [
+        {
+          "id": "1.1",
+          "name": "config.json as Central Hub",
+          "summary": "All server configuration should be defined in a single config.json file rather than hardcoding values throughout the application."
+        },
+        {
+          "id": "1.2",
+          "name": "Configuration Structure",
+          "summary": "The config.json file must include run_details, external_dependencies, and api_details sections with specific nested properties."
+        },
+        {
+          "id": "1.3",
+          "name": "Port Offset System",
+          "summary": "Services are accessed through a root_port plus configurable offsets (e.g., root_port 8000 for dashboard, 8001 for API)."
+        },
+        {
+          "id": "1.4",
+          "name": "Route Definition in Configuration",
+          "summary": "Every API route must be explicitly registered in config.json with its HTTP method, function name, file path, inputs, and expected outputs."
+        },
+        {
+          "id": "1.5",
+          "name": "Environment Variables and .env",
+          "summary": "Sensitive credentials like API keys must be stored in a .env file that is added to .gitignore to prevent accidental exposure."
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "BIST (Built-In Self Test) System",
+      "keypoints": [
+        {
+          "id": "2.1",
+          "name": "What is BIST?",
+          "summary": "BIST is an automated testing framework that validates all endpoints, external dependencies, and dashboard pages are functional on server startup."
+        },
+        {
+          "id": "2.2",
+          "name": "BIST Execution Flow",
+          "summary": "BIST runs automatically after the server starts, testing each endpoint defined in config.json and verifying external API connectivity."
+        },
+        {
+          "id": "2.3",
+          "name": "BIST Test Results",
+          "summary": "Test results are saved to results/bist_results.json containing endpoint status, response codes, success/failure flags, and dependency connectivity."
+        },
+        {
+          "id": "2.4",
+          "name": "Testing External Dependencies",
+          "summary": "Each external API defined in config.json is tested to verify it's reachable and properly authenticated during BIST execution."
+        },
+        {
+          "id": "2.5",
+          "name": "Dashboard Page Validation",
+          "summary": "BIST validates that all required dashboard pages exist and render without errors before marking the server as healthy."
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "name": "Lifecycle Management (start.sh and stop.sh)",
+      "keypoints": [
+        {
+          "id": "3.1",
+          "name": "start.sh: Server Startup Process",
+          "summary": "The start.sh script reads configuration, checks ports, builds the Docker image, runs the container, saves the PID, and executes BIST tests."
+        },
+        {
+          "id": "3.2",
+          "name": "Port Configuration in start.sh",
+          "summary": "The script dynamically extracts root_port and port_offsets from config.json to map container ports to the configured host ports."
+        },
+        {
+          "id": "3.3",
+          "name": "Docker Integration",
+          "summary": "The start.sh script builds a Docker image and runs it as a container with proper port mapping and volume mounting for persistent storage."
+        },
+        {
+          "id": "3.4",
+          "name": "Health Checking",
+          "summary": "After startup, the script waits for the container to initialize, retrieves its PID, and saves it for monitoring and shutdown purposes."
+        },
+        {
+          "id": "3.5",
+          "name": "stop.sh: Server Shutdown Process",
+          "summary": "The stop.sh script reads the PID file, stops and removes the Docker container, and cleans up related files."
+        },
+        {
+          "id": "3.6",
+          "name": "Graceful Shutdown",
+          "summary": "The shutdown process cleanly stops the container before removal, allowing for any necessary cleanup operations."
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "name": "Pages and Dashboard Structure",
+      "keypoints": [
+        {
+          "id": "4.1",
+          "name": "Three-Page Dashboard System",
+          "summary": "The server includes main.html for status, events.html for request logs, and api_docs.html for interactive API documentation."
+        },
+        {
+          "id": "4.2",
+          "name": "Dashboard Route Registration",
+          "summary": "Dashboard routes are registered in ui/dashboard.py and map to template files in the templates/ directory."
+        },
+        {
+          "id": "4.3",
+          "name": "Main Dashboard Page",
+          "summary": "The main dashboard displays server name, port configuration, Docker image name, and links to other pages."
+        },
+        {
+          "id": "4.4",
+          "name": "Events Page",
+          "summary": "The events page shows the last 100 API requests and responses with timestamps, methods, payloads, status codes, and success indicators."
+        },
+        {
+          "id": "4.5",
+          "name": "API Documentation Page",
+          "summary": "The API docs page lists all endpoints with their methods, parameters, expected outputs, and provides an interactive request builder."
+        },
+        {
+          "id": "4.6",
+          "name": "Template Extension",
+          "summary": "Custom dashboard pages can be added by creating new HTML files in templates/ and registering routes in ui/dashboard.py."
+        },
+        {
+          "id": "4.7",
+          "name": "Static Files Organization",
+          "summary": "CSS and JavaScript files are organized in static/ with separate folders for css/ and js/ serving as static assets."
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "name": "Function Organization and Conventions",
+      "keypoints": [
+        {
+          "id": "5.1",
+          "name": "Three Function Types",
+          "summary": "Functions are categorized as public (no prefix), private (_prefix), or dependency (dep_prefix) with specific rules for each type."
+        },
+        {
+          "id": "5.2",
+          "name": "Function Documentation Format",
+          "summary": "Every public function must include a docstring with description, return type, route_test block, and internal_dependencies block."
+        },
+        {
+          "id": "5.3",
+          "name": "Response Format Standard",
+          "summary": "All endpoints must return success responses with {\"success\": true, \"data\": ...} and error responses with {\"success\": false, \"error\": \"message\"}."
+        },
+        {
+          "id": "5.4",
+          "name": "Error Handling Pattern",
+          "summary": "Every function must wrap logic in try-except blocks returning appropriate error responses with 500 status for unexpected errors."
+        },
+        {
+          "id": "5.5",
+          "name": "Testing in Docstring",
+          "summary": "The route_test block in docstrings specifies sample input data and expected output structure for BIST validation."
+        },
+        {
+          "id": "5.6",
+          "name": "Dependency Declaration",
+          "summary": "The internal_dependencies block lists all functions called by the current function for call chain tracing and circular dependency detection."
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "name": "Event Logging System",
+      "keypoints": [
+        {
+          "id": "6.1",
+          "name": "Automatic Event Logging",
+          "summary": "Every API request is automatically logged with timestamp, route, method, request/response data, status code, and execution time."
+        },
+        {
+          "id": "6.2",
+          "name": "Event File Storage",
+          "summary": "Events are stored as individual JSON files in storage/events/ with filenames formatted as TIMESTAMP_METHOD_ROUTE_STATUS.json."
+        },
+        {
+          "id": "6.3",
+          "name": "Retrieving Event Logs",
+          "summary": "Event logs are displayed in the Events dashboard page showing the last 100 requests in reverse chronological order."
+        },
+        {
+          "id": "6.4",
+          "name": "Event Data Structure",
+          "summary": "Each event JSON contains timestamp, route, method, request headers/body, response status/headers/body, and execution time."
+        },
+        {
+          "id": "6.5",
+          "name": "Event Filtering and Search",
+          "summary": "The Events page provides filtering by HTTP method, status code, route path, and success/failure status with CSV/JSON export options."
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "name": "Docker Containerization",
+      "keypoints": [
+        {
+          "id": "7.1",
+          "name": "Dockerfile Structure",
+          "summary": "The Dockerfile defines the base image, working directory, dependencies, exposed ports, and startup command."
+        },
+        {
+          "id": "7.2",
+          "name": "Image Naming Convention",
+          "summary": "The Docker image is named in config.json using the format project-name:latest with the container name derived by appending _container."
+        },
+        {
+          "id": "7.3",
+          "name": "Volume Mounting",
+          "summary": "The start.sh script mounts the local storage/ folder to /app/storage allowing persistent event logs and easy host access."
+        },
+        {
+          "id": "7.4",
+          "name": "Port Mapping",
+          "summary": "Docker maps container port 8000 to the configured root_port for the dashboard and port 8001 to root_port + 1 for the API."
+        },
+        {
+          "id": "7.5",
+          "name": "Environment Variables in Container",
+          "summary": "The Dockerfile can set default environment variables, and runtime variables from .env are made available to the Flask application."
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "name": "Project Structure and File Organization",
+      "keypoints": [
+        {
+          "id": "8.1",
+          "name": "Modifiable vs Restricted Files",
+          "summary": "Users modify config.json, functions/, requirements.txt, templates/, and .env but should not modify app.py, utils/, tests/, Dockerfile, or scripts."
+        },
+        {
+          "id": "8.2",
+          "name": "Directory Tree",
+          "summary": "The project is organized with config at the root, user code in functions/ and templates/, internal code in utils/ and tests/, and runtime data in storage/."
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "name": "Adding New Endpoints",
+      "keypoints": [
+        {
+          "id": "9.1",
+          "name": "Complete Endpoint Addition Workflow",
+          "summary": "Adding endpoints involves creating a function file, implementing the function, registering it in config.json, updating requirements.txt, and restarting."
+        },
+        {
+          "id": "9.2",
+          "name": "Function File Creation",
+          "summary": "New endpoint files should be created in functions/ with the required function format, documentation, error handling, and return tuple."
+        },
+        {
+          "id": "9.3",
+          "name": "Configuration Registration",
+          "summary": "Each route must be registered in config.json under api_details.routes with method, function name, file path, input parameters, and outputs."
+        },
+        {
+          "id": "9.4",
+          "name": "Testing New Endpoints",
+          "summary": "After restarting, new endpoints appear in the API docs page and can be tested via the interactive builder or by checking event logs."
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "name": "External API Integration",
+      "keypoints": [
+        {
+          "id": "10.1",
+          "name": "Integrating External Services",
+          "summary": "External APIs are defined in config.json under external_dependencies with base URL, required headers, and timeout settings."
+        },
+        {
+          "id": "10.2",
+          "name": "Dependency Functions",
+          "summary": "Create functions with dep_ prefix to call external APIs, and they should handle authentication, retries, and error recovery."
+        },
+        {
+          "id": "10.3",
+          "name": "Error Recovery in Dependencies",
+          "summary": "Dependency functions should implement retry logic, timeout handling, auth error recovery, rate limiting awareness, and fallbacks."
+        },
+        {
+          "id": "10.4",
+          "name": "Testing External Dependencies",
+          "summary": "BIST automatically tests external dependencies by making test requests and verifying connectivity, authentication, and response status."
+        }
+      ]
+    },
+    {
+      "id": 11,
+      "name": "Development and Deployment Workflow",
+      "keypoints": [
+        {
+          "id": "11.1",
+          "name": "Development Environment",
+          "summary": "For local development without Docker, create a virtual environment, install requirements, and run python app.py directly."
+        },
+        {
+          "id": "11.2",
+          "name": "Local Testing Workflow",
+          "summary": "Development involves modifying code, updating config, restarting, testing via API docs, and reviewing event logs and BIST results."
+        },
+        {
+          "id": "11.3",
+          "name": "Production Checklist",
+          "summary": "Before production deployment, verify all routes are configured, functions created, dependencies added, credentials set, and tests pass."
+        },
+        {
+          "id": "11.4",
+          "name": "Deployment Steps",
+          "summary": "Production deployment involves building the Docker image, tagging for the registry, pushing to registry, updating config, and running start.sh."
+        }
+      ]
+    },
+    {
+      "id": 12,
+      "name": "Troubleshooting and Debugging",
+      "keypoints": [
+        {
+          "id": "12.1",
+          "name": "Common Issues and Solutions",
+          "summary": "Common issues include port conflicts, missing config.json, function not found errors, and BIST failures, each with specific solutions."
+        },
+        {
+          "id": "12.2",
+          "name": "Debugging Techniques",
+          "summary": "Debugging involves viewing container logs, accessing container shell, checking event logs, monitoring BIST results, or running locally."
+        },
+        {
+          "id": "12.3",
+          "name": "Log Locations",
+          "summary": "Flask logs appear in Docker container output, event logs in storage/events/, BIST results in results/bist_results.json, and PID in storage/server.pid."
+        }
+      ]
+    },
+    {
+      "id": 13,
+      "name": "Configuration Reference",
+      "keypoints": [
+        {
+          "id": "13.1",
+          "name": "Configuration Parameters",
+          "summary": "Key configuration parameters include root_port, port_offsets, local_storage_folder, docker_image, and individual route properties."
+        },
+        {
+          "id": "13.2",
+          "name": "Environment Variables",
+          "summary": "Sensitive information like API_KEY, EXTERNAL_API_URL, and DATABASE_URL should be stored in .env files never committed to version control."
+        }
+      ]
+    },
+    {
+      "id": 14,
+      "name": "Performance Optimization",
+      "keypoints": [
+        {
+          "id": "14.1",
+          "name": "Response Optimization",
+          "summary": "Optimize responses by returning only necessary data, implementing pagination, caching frequently accessed data, and minimizing JSON payloads."
+        },
+        {
+          "id": "14.2",
+          "name": "Scaling Considerations",
+          "summary": "For scaling, use connection pooling, implement rate limiting, consider load balancing, and monitor response times via event logs."
+        }
+      ]
+    },
+    {
+      "id": 15,
+      "name": "Security Best Practices",
+      "keypoints": [
+        {
+          "id": "15.1",
+          "name": "Credential Management",
+          "summary": "Never hardcode credentials, use .env files, add .env to .gitignore, rotate credentials regularly, and maintain environment-specific configs."
+        },
+        {
+          "id": "15.2",
+          "name": "Input Validation",
+          "summary": "Validate all request parameters, use type hints, check request.is_json, and return 400 Bad Request for invalid inputs."
+        },
+        {
+          "id": "15.3",
+          "name": "Output Sanitization",
+          "summary": "Avoid exposing internal error details, log full errors internally while returning generic messages, and remove sensitive data from logs."
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,131 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Skills Definition Schema",
+  "description": "Schema for validating skill definitions JSON format",
+  "type": "object",
+  "properties": {
+    "skills": {
+      "type": "array",
+      "description": "Array of skills",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique skill identifier",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "name": {
+            "type": "string",
+            "description": "Skill name",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "purpose": {
+            "type": "string",
+            "description": "What this skill is for",
+            "minLength": 1,
+            "maxLength": 500
+          },
+          "requiredFor": {
+            "type": "string",
+            "description": "What documentation process needs this skill",
+            "minLength": 1,
+            "maxLength": 500
+          },
+          "complexity": {
+            "type": "string",
+            "description": "Skill difficulty level",
+            "enum": ["Basic", "Basic-Intermediate", "Intermediate", "Intermediate-Advanced", "Advanced"]
+          },
+          "timeTypical": {
+            "type": "string",
+            "description": "Typical time to execute this skill",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "procedure": {
+            "type": "array",
+            "description": "Steps to execute this skill",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "properties": {
+                "step": {
+                  "type": "integer",
+                  "description": "Step number",
+                  "minimum": 1
+                },
+                "title": {
+                  "type": "string",
+                  "description": "Step title",
+                  "minLength": 1,
+                  "maxLength": 100
+                },
+                "description": {
+                  "type": "string",
+                  "description": "Step description",
+                  "minLength": 1,
+                  "maxLength": 1000
+                },
+                "substeps": {
+                  "type": "array",
+                  "description": "Sub-steps if applicable",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 500
+                  }
+                }
+              },
+              "required": ["step", "title", "description"],
+              "additionalProperties": false
+            }
+          },
+          "inputs": {
+            "type": "array",
+            "description": "Input data required",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            }
+          },
+          "outputs": {
+            "type": "array",
+            "description": "Output produced",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            }
+          },
+          "validationChecklist": {
+            "type": "array",
+            "description": "Validation items to verify",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            }
+          },
+          "dependencies": {
+            "type": "array",
+            "description": "Other skills this depends on",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100
+            }
+          }
+        },
+        "required": ["id", "name", "purpose", "requiredFor", "procedure", "inputs", "outputs"],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": ["skills"],
+  "additionalProperties": false
+}

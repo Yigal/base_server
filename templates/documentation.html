@@ -1,0 +1,507 @@
+{% extends "base.html" %}
+
+{% block title %}Documentation - Server Dashboard{% endblock %}
+
+{% block page_title %}📚 Project Documentation{% endblock %}
+
+{% block content %}
+<style>
+    .doc-toolbar {
+        display: flex;
+        gap: 15px;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+        align-items: center;
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 8px;
+        border-left: 4px solid #667eea;
+    }
+
+    .doc-folder-selector {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        flex: 1;
+        min-width: 250px;
+    }
+
+    .doc-folder-selector label {
+        font-weight: 500;
+        color: #333;
+        white-space: nowrap;
+    }
+
+    .doc-folder-selector select {
+        flex: 1;
+        padding: 8px 12px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 14px;
+        background: white;
+        cursor: pointer;
+    }
+
+    .doc-folder-selector select:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.1);
+    }
+
+    .doc-actions {
+        display: flex;
+        gap: 10px;
+    }
+
+    .doc-btn {
+        padding: 8px 16px;
+        background: #667eea;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        white-space: nowrap;
+    }
+
+    .doc-btn:hover {
+        background: #5568d3;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .doc-btn:active {
+        transform: translateY(0);
+    }
+
+    .doc-btn.secondary {
+        background: #f0f0f0;
+        color: #333;
+        border: 1px solid #ddd;
+    }
+
+    .doc-btn.secondary:hover {
+        background: #e8e8e8;
+    }
+
+    .doc-btn-refresh {
+        padding: 8px 12px;
+    }
+
+    .doc-container {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+    }
+
+    .doc-content {
+        padding: 30px;
+        line-height: 1.6;
+        color: #333;
+        max-height: 70vh;
+        overflow-y: auto;
+    }
+
+    .doc-content h1 {
+        color: #667eea;
+        margin: 30px 0 15px 0;
+        font-size: 2em;
+        border-bottom: 2px solid #e0e0e0;
+        padding-bottom: 10px;
+    }
+
+    .doc-content h2 {
+        color: #764ba2;
+        margin: 25px 0 12px 0;
+        font-size: 1.5em;
+    }
+
+    .doc-content h3 {
+        color: #555;
+        margin: 20px 0 10px 0;
+        font-size: 1.2em;
+    }
+
+    .doc-content p {
+        margin: 10px 0;
+    }
+
+    .doc-content code {
+        background: #f4f4f4;
+        padding: 2px 6px;
+        border-radius: 3px;
+        font-family: 'Courier New', monospace;
+        color: #d73a49;
+    }
+
+    .doc-content pre {
+        background: #f4f4f4;
+        padding: 15px;
+        border-radius: 6px;
+        overflow-x: auto;
+        border-left: 4px solid #667eea;
+        margin: 15px 0;
+    }
+
+    .doc-content pre code {
+        color: #333;
+        padding: 0;
+        background: none;
+    }
+
+    .doc-content blockquote {
+        border-left: 4px solid #667eea;
+        padding-left: 15px;
+        margin: 15px 0;
+        color: #666;
+        font-style: italic;
+    }
+
+    .doc-content ul,
+    .doc-content ol {
+        margin: 15px 0;
+        padding-left: 30px;
+    }
+
+    .doc-content li {
+        margin: 8px 0;
+    }
+
+    .doc-content a {
+        color: #667eea;
+        text-decoration: none;
+    }
+
+    .doc-content a:hover {
+        text-decoration: underline;
+    }
+
+    .doc-loading {
+        text-align: center;
+        padding: 40px;
+        color: #666;
+    }
+
+    .doc-loading p {
+        font-size: 1.1em;
+    }
+
+    .doc-error {
+        background: #ffebee;
+        color: #c62828;
+        padding: 20px;
+        border-radius: 4px;
+        border-left: 4px solid #c62828;
+    }
+
+    .doc-meta {
+        background: #f0f0f0;
+        padding: 12px 30px;
+        font-size: 0.9em;
+        color: #666;
+        border-bottom: 1px solid #e0e0e0;
+    }
+
+    @media (max-width: 768px) {
+        .doc-toolbar {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .doc-folder-selector {
+            flex-direction: column;
+        }
+
+        .doc-actions {
+            width: 100%;
+        }
+
+        .doc-btn {
+            flex: 1;
+        }
+
+        .doc-content {
+            padding: 20px;
+            max-height: 60vh;
+        }
+
+        .doc-content h1 {
+            font-size: 1.5em;
+        }
+
+        .doc-content h2 {
+            font-size: 1.2em;
+        }
+    }
+</style>
+
+<div class="doc-toolbar">
+    <div class="doc-folder-selector">
+        <label for="doc-folder-select">Documentation Folder:</label>
+        <select id="doc-folder-select" onchange="loadDocumentation()">
+            <option value="">Loading folders...</option>
+        </select>
+    </div>
+    <div class="doc-actions">
+        <button class="doc-btn doc-btn-refresh" onclick="refreshDocFolders()" title="Refresh folder list">
+            🔄 Refresh
+        </button>
+        <button class="doc-btn secondary" onclick="downloadDocumentation()" title="Download current documentation">
+            ⬇️ Download
+        </button>
+    </div>
+</div>
+
+<div class="doc-container">
+    <div class="doc-meta" id="doc-meta" style="display: none;"></div>
+    <div class="doc-content" id="doc-content">
+        <div class="doc-loading">
+            <p>Loading documentation folders...</p>
+        </div>
+    </div>
+</div>
+
+<script>
+    let currentDocContent = null;
+    let currentDocFolder = null;
+    let currentDocFile = null;
+
+    // Ensure document is fully loaded before initializing
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', loadDocFolders);
+    } else {
+        // Document is already loaded
+        loadDocFolders();
+    }
+
+    async function loadDocFolders() {
+        try {
+            const select = document.getElementById('doc-folder-select');
+            if (!select) {
+                console.error('Dropdown select element not found in DOM');
+                return;
+            }
+
+            const response = await fetch('/ui/api/documentation-folders');
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+
+            const data = await response.json();
+
+            if (data.success && data.folders) {
+                populateDocFolders(data.folders);
+            } else {
+                const errorMsg = data.error || 'Unknown error loading folders';
+                showDocError('Failed to load documentation folders: ' + errorMsg);
+            }
+        } catch (error) {
+            showDocError('Error loading documentation folders: ' + error.message);
+            console.error('Error:', error);
+        }
+    }
+
+    function populateDocFolders(folders) {
+        const select = document.getElementById('doc-folder-select');
+        if (!select) {
+            console.error('Dropdown element not found');
+            return;
+        }
+
+        select.innerHTML = '';
+
+        if (!folders || folders.length === 0) {
+            select.innerHTML = '<option value="">No documentation folders found</option>';
+            showDocError('No documentation folders available');
+            return;
+        }
+
+        folders.forEach(folder => {
+            const option = document.createElement('option');
+            option.value = folder.name;
+            option.textContent = folder.display_name + ` (${folder.file_count} files)`;
+            select.appendChild(option);
+        });
+
+        // Select the first folder and load it
+        if (folders.length > 0) {
+            select.value = folders[0].name;
+            loadDocumentation();
+        }
+    }
+
+    async function loadDocumentation() {
+        const folder = document.getElementById('doc-folder-select').value;
+
+        if (!folder) {
+            showDocError('Please select a documentation folder');
+            return;
+        }
+
+        currentDocFolder = folder;
+        showDocLoading();
+
+        try {
+            // Try summary markdown first
+            let response = await fetch(`/ui/api/document?folder=${encodeURIComponent(folder)}&document=${encodeURIComponent(folder)}&format=summary_markdown`);
+            let data = await response.json();
+
+            // If summary doesn't exist, try full markdown
+            if (!data.success) {
+                response = await fetch(`/ui/api/document?folder=${encodeURIComponent(folder)}&document=${encodeURIComponent(folder)}&format=full_markdown`);
+                data = await response.json();
+            }
+
+            if (data.success) {
+                currentDocContent = data.content;
+                currentDocFile = data.filename;
+                displayDocumentation(data.content, data.filename, folder);
+                updateDocMeta(folder, data.filename, data.size);
+            } else {
+                showDocError('No documentation found in folder: ' + escapeHtml(folder));
+            }
+        } catch (error) {
+            showDocError('Error loading documentation: ' + error.message);
+            console.error('Error:', error);
+        }
+    }
+
+    function displayDocumentation(content, filename, folder) {
+        const contentDiv = document.getElementById('doc-content');
+
+        if (!content) {
+            showDocError('No content available for this documentation');
+            return;
+        }
+
+        // Parse markdown to HTML
+        let html = content;
+
+        // Code blocks (must be done before escaping)
+        const codeBlocks = [];
+        html = html.replace(/```([\s\S]*?)```/g, (match, code) => {
+            const index = codeBlocks.length;
+            codeBlocks.push(escapeHtml(code.trim()));
+            return `__CODE_BLOCK_${index}__`;
+        });
+
+        // Escape HTML
+        html = escapeHtml(html);
+
+        // Restore code blocks
+        codeBlocks.forEach((code, index) => {
+            html = html.replace(`__CODE_BLOCK_${index}__`, `<pre><code>${code}</code></pre>`);
+        });
+
+        // Headers (must be before paragraphs)
+        html = html.replace(/^### (.*?)$/gm, '<h3>$1</h3>');
+        html = html.replace(/^## (.*?)$/gm, '<h2>$1</h2>');
+        html = html.replace(/^# (.*?)$/gm, '<h1>$1</h1>');
+
+        // Bold and italic
+        html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+        html = html.replace(/__(.*?)__/g, '<strong>$1</strong>');
+        html = html.replace(/\*(.*?)\*/g, '<em>$1</em>');
+        html = html.replace(/_(.*?)_/g, '<em>$1</em>');
+
+        // Inline code
+        html = html.replace(/`(.*?)`/g, '<code>$1</code>');
+
+        // Links
+        html = html.replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank">$1</a>');
+
+        // Blockquotes
+        html = html.replace(/^&gt; (.*?)$/gm, '<blockquote>$1</blockquote>');
+
+        // Lists
+        html = html.replace(/^\* (.*?)$/gm, '<li>$1</li>');
+        html = html.replace(/^\- (.*?)$/gm, '<li>$1</li>');
+        html = html.replace(/^(\d+)\. (.*?)$/gm, '<li>$2</li>');
+        html = html.replace(/(<li>.*?<\/li>)/s, (match) => {
+            return '<ul>' + match + '</ul>';
+        });
+
+        // Paragraphs (handle multiple newlines)
+        html = html.replace(/\n\n+/g, '</p><p>');
+        html = '<p>' + html + '</p>';
+
+        // Clean up empty paragraphs
+        html = html.replace(/<p>\s*<\/p>/g, '');
+
+        contentDiv.innerHTML = html;
+    }
+
+    function updateDocMeta(folder, filename, size) {
+        const metaDiv = document.getElementById('doc-meta');
+        metaDiv.innerHTML = `
+            <strong>📁 Folder:</strong> ${escapeHtml(folder)} |
+            <strong>📄 File:</strong> ${escapeHtml(filename)} |
+            <strong>📊 Size:</strong> ${(size / 1024).toFixed(1)} KB
+        `;
+        metaDiv.style.display = 'block';
+    }
+
+    function showDocLoading() {
+        const contentDiv = document.getElementById('doc-content');
+        contentDiv.innerHTML = '<div class="doc-loading"><p>Loading documentation...</p></div>';
+    }
+
+    function showDocError(message) {
+        const contentDiv = document.getElementById('doc-content');
+        contentDiv.innerHTML = `<div class="doc-error"><strong>Error:</strong> ${escapeHtml(message)}</div>`;
+    }
+
+    function escapeHtml(text) {
+        const map = {
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#039;'
+        };
+        return String(text).replace(/[&<>"']/g, m => map[m]);
+    }
+
+    function refreshDocFolders() {
+        const btn = document.querySelector('.doc-btn-refresh');
+        btn.disabled = true;
+        btn.textContent = '⏳ Refreshing...';
+
+        loadDocFolders().then(() => {
+            btn.textContent = '✓ Refreshed!';
+            setTimeout(() => {
+                btn.textContent = '🔄 Refresh';
+                btn.disabled = false;
+            }, 2000);
+        }).catch((error) => {
+            btn.textContent = '❌ Error';
+            setTimeout(() => {
+                btn.textContent = '🔄 Refresh';
+                btn.disabled = false;
+            }, 2000);
+        });
+    }
+
+    function downloadDocumentation() {
+        if (!currentDocContent) {
+            alert('No documentation loaded');
+            return;
+        }
+
+        const filename = `${currentDocFolder}_documentation.md`;
+        const blob = new Blob([currentDocContent], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+</script>
+
+{% endblock %}

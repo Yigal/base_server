@@ -1,0 +1,495 @@
+{
+  "skills": [
+    {
+      "skill_id": 1,
+      "name": "Request Intake and Documentation",
+      "purpose": "Capture and document feature requests with required details",
+      "agent": "Feature Request Intake Agent",
+      "complexity": "Intermediate",
+      "procedure": [
+        "Accept user feature request",
+        "Extract key requirements and objectives",
+        "Identify success criteria",
+        "Document request context and background",
+        "Create standardized request document",
+        "Assign request ID and timestamp",
+        "Signal readiness for research phase"
+      ],
+      "inputs": [
+        "User feature request (text/description)",
+        "Current system state documentation"
+      ],
+      "outputs": {
+        "document_type": "Request Document",
+        "contains": [
+          "Request ID",
+          "Feature description",
+          "Success criteria",
+          "User requirements",
+          "Target timeline",
+          "Scope definition"
+        ]
+      },
+      "validation_checklist": [
+        "Request clearly documented",
+        "Success criteria defined and measurable",
+        "Scope boundaries identified",
+        "Request ID assigned",
+        "Ready for research phase"
+      ]
+    },
+    {
+      "skill_id": 2,
+      "name": "Technical Research and Framework Discovery",
+      "purpose": "Research required frameworks, libraries, and best practices",
+      "agent": "Technical Researcher Agent",
+      "complexity": "Advanced",
+      "procedure": [
+        "Analyze request requirements",
+        "Search for relevant frameworks and libraries",
+        "Evaluate technology options",
+        "Research best practices for feature type",
+        "Document findings and recommendations",
+        "Create technology recommendation report",
+        "Make recommendations available to design phase"
+      ],
+      "inputs": [
+        "Feature request document",
+        "Current technology stack",
+        "Performance requirements"
+      ],
+      "outputs": {
+        "document_type": "Research Findings Report",
+        "contains": [
+          "Recommended frameworks",
+          "Technology alternatives",
+          "Best practice patterns",
+          "Performance considerations",
+          "Integration points with existing system"
+        ]
+      },
+      "validation_checklist": [
+        "Research comprehensive",
+        "Multiple options evaluated",
+        "Recommendations justified",
+        "Integration impact assessed",
+        "Ready for design phase"
+      ]
+    },
+    {
+      "skill_id": 3,
+      "name": "API Specification and Contract Design",
+      "purpose": "Define API endpoint specifications before implementation",
+      "agent": "API Designer Agent",
+      "complexity": "Advanced",
+      "procedure": [
+        "Review request and research findings",
+        "Define endpoint path and HTTP method",
+        "Document request parameters",
+        "Define response schema with examples",
+        "Specify error responses and codes",
+        "Define authentication requirements",
+        "Document rate limiting and constraints",
+        "Create OpenAPI/Swagger specification",
+        "Make specification available to implementation teams"
+      ],
+      "inputs": [
+        "Request document",
+        "Research findings",
+        "Current API patterns",
+        "Database schema"
+      ],
+      "outputs": {
+        "document_type": "API Specification",
+        "contains": [
+          "Endpoint definition",
+          "Request/response schemas",
+          "Error handling",
+          "Examples with sample data",
+          "Authentication requirements",
+          "Constraints and limits",
+          "OpenAPI spec file"
+        ]
+      },
+      "validation_checklist": [
+        "Endpoint clearly defined",
+        "Request/response schemas complete",
+        "Error cases covered",
+        "Examples included",
+        "Implementation teams can start work"
+      ]
+    },
+    {
+      "skill_id": 4,
+      "name": "Technical Architecture Design",
+      "purpose": "Create technical design for the feature",
+      "agent": "Architecture Designer Agent",
+      "complexity": "Advanced",
+      "procedure": [
+        "Review request, research, and API specification",
+        "Design data model and database schema",
+        "Plan integration points with existing system",
+        "Design error handling and logging strategy",
+        "Plan caching and performance optimization",
+        "Design security and validation layers",
+        "Document architectural decisions",
+        "Create architecture diagram",
+        "Make design available to implementation teams"
+      ],
+      "inputs": [
+        "Request document",
+        "API specification",
+        "Research findings",
+        "Current system architecture"
+      ],
+      "outputs": {
+        "document_type": "Architecture Design Document",
+        "contains": [
+          "Data model and schema",
+          "Integration points",
+          "Error handling strategy",
+          "Validation rules",
+          "Security considerations",
+          "Performance optimizations",
+          "Deployment considerations"
+        ]
+      },
+      "validation_checklist": [
+        "Design complete and detailed",
+        "Integration points identified",
+        "Error handling planned",
+        "Security validated",
+        "Performance considered"
+      ]
+    },
+    {
+      "skill_id": 5,
+      "name": "Backend Implementation (FastAPI Route)",
+      "purpose": "Implement the FastAPI endpoint",
+      "agent": "Backend Engineer Agent",
+      "complexity": "Advanced",
+      "phase": 3,
+      "parallel": true,
+      "procedure": [
+        "Receive API specification and architecture design",
+        "Set up route handler with correct method and path",
+        "Implement parameter validation",
+        "Implement core business logic",
+        "Implement error handling",
+        "Add logging and monitoring",
+        "Implement database interactions",
+        "Add caching if specified",
+        "Write code documentation",
+        "Signal completion to integration phase"
+      ],
+      "inputs": [
+        "API specification",
+        "Architecture design",
+        "Code style guidelines",
+        "Database access patterns"
+      ],
+      "outputs": {
+        "type": "FastAPI route implementation",
+        "contains": [
+          "Route handler function",
+          "Parameter validation",
+          "Business logic",
+          "Error handling",
+          "Database integration",
+          "Logging statements",
+          "Code documentation"
+        ]
+      },
+      "validation_checklist": [
+        "Route correctly implements specification",
+        "All parameters validated",
+        "Error handling complete",
+        "Logging configured",
+        "Database interactions correct",
+        "Code documented"
+      ]
+    },
+    {
+      "skill_id": 6,
+      "name": "Comprehensive Test Writing",
+      "purpose": "Write tests that validate the feature meets requirements",
+      "agent": "QA Engineer Agent",
+      "complexity": "Advanced",
+      "phase": 3,
+      "parallel": true,
+      "procedure": [
+        "Receive API specification and request requirements",
+        "Create unit tests for business logic",
+        "Create integration tests for API endpoint",
+        "Write tests for error scenarios",
+        "Write tests for edge cases",
+        "Create performance tests",
+        "Write validation tests for database interactions",
+        "Create end-to-end feature tests",
+        "Document test coverage",
+        "Signal completion to integration phase"
+      ],
+      "inputs": [
+        "API specification",
+        "Request requirements",
+        "Test framework setup",
+        "Mock data specifications"
+      ],
+      "outputs": {
+        "type": "Comprehensive test suite",
+        "contains": [
+          "Unit tests",
+          "Integration tests",
+          "Error scenario tests",
+          "Edge case tests",
+          "Performance tests",
+          "Database tests",
+          "End-to-end tests",
+          "Test documentation"
+        ]
+      },
+      "validation_checklist": [
+        "Test coverage comprehensive",
+        "All requirements covered",
+        "Error cases tested",
+        "Edge cases covered",
+        "Performance validated",
+        "Tests well documented"
+      ]
+    },
+    {
+      "skill_id": 7,
+      "name": "Dashboard Integration and UI Development",
+      "purpose": "Create dashboard page to demonstrate new feature",
+      "agent": "Frontend Engineer Agent",
+      "complexity": "Advanced",
+      "phase": 3,
+      "parallel": true,
+      "procedure": [
+        "Receive API specification and request details",
+        "Design dashboard page layout",
+        "Create page component structure",
+        "Implement API endpoint caller",
+        "Add input validation UI",
+        "Create response display formatter",
+        "Add error handling UI",
+        "Create example request/response section",
+        "Add user interaction feedback",
+        "Document UI features"
+      ],
+      "inputs": [
+        "API specification",
+        "Request details",
+        "Design system guidelines",
+        "Existing dashboard patterns"
+      ],
+      "outputs": {
+        "type": "Dashboard page",
+        "contains": [
+          "Page layout and structure",
+          "API endpoint caller component",
+          "Input form with validation",
+          "Response display area",
+          "Example requests section",
+          "Error handling UI",
+          "Documentation"
+        ]
+      },
+      "validation_checklist": [
+        "Page layout clean and intuitive",
+        "API calls correctly formatted",
+        "Input validation working",
+        "Responses displayed correctly",
+        "Examples clear and helpful",
+        "Error handling user-friendly"
+      ]
+    },
+    {
+      "skill_id": 8,
+      "name": "Component Integration and Coordination",
+      "purpose": "Integrate all components and verify they work together",
+      "agent": "Integration Coordinator Agent",
+      "complexity": "Advanced",
+      "phase": 4,
+      "procedure": [
+        "Receive completed backend, tests, and frontend",
+        "Verify API specification matches implementation",
+        "Run test suite against implementation",
+        "Verify dashboard correctly calls API",
+        "Check error handling consistency",
+        "Verify logging and monitoring",
+        "Test end-to-end flow",
+        "Document any issues for feedback loop",
+        "Signal ready for QA phase or report issues"
+      ],
+      "inputs": [
+        "Backend implementation",
+        "Test suite",
+        "Frontend implementation",
+        "API specification",
+        "Architecture design"
+      ],
+      "outputs": {
+        "type": "Integration Report",
+        "contains": [
+          "Verification results",
+          "Component compatibility status",
+          "Issues found (if any)",
+          "Feedback for implementation teams",
+          "Ready for QA confirmation"
+        ]
+      },
+      "validation_checklist": [
+        "Components communicate correctly",
+        "Tests passing",
+        "API specification matched",
+        "Error handling consistent",
+        "Logging working",
+        "End-to-end flow verified"
+      ]
+    },
+    {
+      "skill_id": 9,
+      "name": "Quality Assurance and Validation",
+      "purpose": "Comprehensive testing and validation of complete feature",
+      "agent": "Quality Assurance Agent",
+      "complexity": "Advanced",
+      "phase": 4,
+      "procedure": [
+        "Receive integrated feature",
+        "Execute full test suite",
+        "Perform manual feature testing",
+        "Test all error scenarios",
+        "Verify performance requirements met",
+        "Test with real-world data",
+        "Verify documentation accuracy",
+        "Create QA report",
+        "Document any issues found",
+        "Make go/no-go decision"
+      ],
+      "inputs": [
+        "Integrated feature",
+        "Test suite",
+        "Request requirements",
+        "Performance specifications"
+      ],
+      "outputs": {
+        "type": "QA Report",
+        "contains": [
+          "Test results summary",
+          "Coverage analysis",
+          "Performance metrics",
+          "Issues found (if any)",
+          "Approval status",
+          "Deployment readiness"
+        ]
+      },
+      "validation_checklist": [
+        "All tests passing",
+        "Requirements met",
+        "Performance acceptable",
+        "Error handling verified",
+        "Documentation complete",
+        "Ready for deployment"
+      ]
+    },
+    {
+      "skill_id": 10,
+      "name": "Documentation and Knowledge Transfer",
+      "purpose": "Create comprehensive documentation for the new feature",
+      "agent": "Documentation Specialist Agent",
+      "complexity": "Intermediate",
+      "phase": 5,
+      "procedure": [
+        "Gather all specifications and designs",
+        "Write feature overview documentation",
+        "Document API endpoint with examples",
+        "Write user guide for dashboard feature",
+        "Create troubleshooting guide",
+        "Document architectural decisions",
+        "Create deployment guide",
+        "Write integration guide for developers",
+        "Generate API reference documentation",
+        "Make documentation available"
+      ],
+      "inputs": [
+        "All specifications and designs",
+        "API endpoint details",
+        "Dashboard page details",
+        "Implementation details"
+      ],
+      "outputs": {
+        "type": "Complete Documentation",
+        "contains": [
+          "Feature overview",
+          "API documentation",
+          "User guide",
+          "Developer guide",
+          "Architecture documentation",
+          "Troubleshooting guide",
+          "Deployment guide"
+        ]
+      },
+      "validation_checklist": [
+        "Documentation complete",
+        "Examples accurate",
+        "Clear and readable",
+        "All features covered",
+        "Ready for users and developers"
+      ]
+    },
+    {
+      "skill_id": 11,
+      "name": "Phase Transition Management",
+      "purpose": "Manage transitions between workflow phases",
+      "agent": "Feature Request Workflow Orchestrator",
+      "complexity": "Intermediate",
+      "procedure": [
+        "Monitor phase completion status",
+        "Verify all requirements for next phase met",
+        "Notify agents of phase transition",
+        "Pass required documents to next phase",
+        "Handle feedback loops and iterations",
+        "Update workflow status",
+        "Generate progress reports"
+      ],
+      "validation_checklist": [
+        "Phase requirements verified",
+        "All agents notified",
+        "Documents passed correctly",
+        "Workflow status updated",
+        "Timeline tracked"
+      ]
+    },
+    {
+      "skill_id": 12,
+      "name": "Feedback Loop Management",
+      "purpose": "Handle issues and iterations during development",
+      "agent": "Feature Request Workflow Orchestrator",
+      "complexity": "Advanced",
+      "procedure": [
+        "Receive issues from validation phases",
+        "Categorize issue severity and type",
+        "Route issues to responsible agents",
+        "Track iteration timeline",
+        "Verify fixes address root causes",
+        "Re-run validation after fixes",
+        "Document lessons learned",
+        "Update procedures if needed"
+      ],
+      "validation_checklist": [
+        "Issues properly categorized",
+        "Routed to correct agents",
+        "Fixes verified",
+        "Timeline tracked",
+        "Lessons documented"
+      ]
+    }
+  ],
+  "metadata": {
+    "total_skills": 12,
+    "phase_3_parallel_agents": 3,
+    "estimated_total_timeline": "18-29 hours",
+    "improvement_over_sequential": "50% faster than sequential approach"
+  }
+}

@@ -1,0 +1,1098 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Base Server Project Keypoints</title>
+    <style>
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --color-primary: #007bff;
+            --color-secondary: #6c757d;
+            --color-success: #28a745;
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8f9fa;
+            --text-primary: #212529;
+            --text-secondary: #6c757d;
+            --border-color: #dee2e6;
+        }
+
+        html.theme-dark {
+            --bg-primary: #1e1e1e;
+            --bg-secondary: #2d2d2d;
+            --text-primary: #e0e0e0;
+            --text-secondary: #a0a0a0;
+            --border-color: #404040;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--text-primary);
+            background-color: var(--bg-primary);
+        }
+
+        header {
+            position: sticky;
+            top: 0;
+            background-color: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1.5rem;
+            z-index: 100;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .documentation {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+
+        .doc-section {
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+        }
+
+        .section-header {
+            padding: 1rem;
+            background-color: var(--bg-secondary);
+            cursor: pointer;
+            user-select: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: background-color 0.2s;
+        }
+
+        .section-header:hover {
+            background-color: #e9ecef;
+        }
+
+        .section-toggle {
+            display: inline-block;
+            transition: transform 0.3s;
+            width: 1.2rem;
+            text-align: center;
+        }
+
+        .section-toggle.collapsed {
+            transform: rotate(-90deg);
+        }
+
+        .section-content {
+            padding: 0;
+        }
+
+        .keypoint {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .keypoint:last-child {
+            border-bottom: none;
+        }
+
+        .keypoint-header {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+        }
+
+        .keypoint-id {
+            font-weight: bold;
+            color: var(--color-primary);
+            min-width: 3rem;
+        }
+
+        .summary {
+            margin-bottom: 0.75rem;
+            font-style: italic;
+            color: var(--text-secondary);
+        }
+
+        .keypoint-details {
+            margin: 0.75rem 0;
+            padding: 0.75rem;
+            background-color: var(--bg-secondary);
+            border-left: 3px solid var(--color-primary);
+            border-radius: 2px;
+            cursor: pointer;
+        }
+
+        .keypoint-details > summary {
+            font-weight: 500;
+            padding: 0.25rem 0;
+            user-select: none;
+        }
+
+        .description {
+            margin-top: 0.75rem;
+            padding-top: 0.75rem;
+            border-top: 1px solid var(--border-color);
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        button {
+            padding: 0.5rem 1rem;
+            background-color: var(--color-primary);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 0.5rem;
+            transition: background-color 0.2s;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .copy-btn {
+            font-size: 0.9rem;
+            padding: 0.35rem 0.75rem;
+        }
+
+        .search-container {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 1rem;
+            color: var(--text-primary);
+            background-color: var(--bg-primary);
+        }
+
+        .search-count {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .export-container {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.75rem;
+        }
+
+        .export-btn {
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+        }
+
+        .theme-toggle {
+            padding: 0.5rem 1rem;
+        }
+
+        footer {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-secondary);
+            border-top: 1px solid var(--border-color);
+            margin-top: 2rem;
+            font-size: 0.9rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            body {
+                font-size: 0.95rem;
+            }
+
+            header {
+                padding: 1rem;
+            }
+
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            h1 {
+                font-size: 1.5rem;
+            }
+
+            .documentation {
+                padding: 1rem 0.5rem;
+            }
+
+            .doc-section {
+                margin-bottom: 1rem;
+            }
+
+            .keypoint {
+                padding: 1rem;
+            }
+
+            .search-input {
+                padding: 0.5rem;
+            }
+        }
+
+        /* Print styles */
+        @media print {
+            header, footer {
+                display: none;
+            }
+
+            .doc-section {
+                break-inside: avoid;
+                page-break-inside: avoid;
+            }
+
+            .section-content {
+                display: block !important;
+            }
+
+            button {
+                display: none;
+            }
+
+            .section-header {
+                background-color: transparent;
+                border-bottom: 2px solid var(--text-primary);
+                padding-bottom: 0.5rem;
+            }
+        }
+
+    </style>
+</head>
+<body class="theme-light">
+    <header>
+        <div class="header-content">
+            <div class="header-left">
+                <h1>Base Server Project Keypoints</h1>
+                <p class="subtitle">Quick reference summaries for building projects based on the base_server template</p>
+                <small>Version 1.0.0</small>
+            </div>
+            <div class="header-right">
+                            <button id="theme-toggle" onclick="toggleTheme()" class="theme-toggle">
+                🌙 Theme
+            </button>
+            </div>
+        </div>
+                <div class="search-container">
+            <input
+                type="text"
+                id="search-input"
+                class="search-input"
+                placeholder="Search documentation..."
+                onkeyup="searchDocumentation()"
+            >
+            <span id="search-count" class="search-count"></span>
+        </div>
+                <div class="export-container">
+            <button onclick="exportAsJSON()" class="export-btn">Export JSON</button>
+            <button onclick="window.print()" class="export-btn">Print/PDF</button>
+        </div>
+    </header>
+
+    <main class="documentation">
+            <section class="doc-section" id="section-1">
+        <h2 class="section-header" onclick="toggleSection('section-1')">
+            <span class="section-toggle">▼</span>
+            <span class="section-title">1. Configuration Management</span>
+        </h2>
+        <div class="section-content" style="display: none;">
+            <article class="keypoint" id="keypoint-1.1">
+                <h3 class="keypoint-header">
+                    <span class="keypoint-id">1.1</span>
+                    <span class="keypoint-name">config.json as Central Hub</span>
+                </h3>
+                <p class="summary">All server configuration should be defined in a single config.json file rather than hardcoding values throughout the application.</p>
+                <button class="copy-btn" onclick="copyToClipboard('1.1')">Copy Summary</button>
+            </article>
+            <article class="keypoint" id="keypoint-1.2">
+                <h3 class="keypoint-header">
+                    <span class="keypoint-id">1.2</span>
+                    <span class="keypoint-name">Configuration Structure</span>
+                </h3>
+                <p class="summary">The config.json file must include run_details, external_dependencies, and api_details sections with specific nested properties.</p>
+                <button class="copy-btn" onclick="copyToClipboard('1.2')">Copy Summary</button>
+            </article>
+            <article class="keypoint" id="keypoint-1.3">
+                <h3 class="keypoint-header">
+                    <span class="keypoint-id">1.3</span>
+                    <span class="keypoint-name">Port Offset System</span>
+                </h3>
+                <p class="summary">Services are accessed through a root_port plus configurable offsets (e.g., root_port 8000 for dashboard, 8001 for API).</p>
+                <button class="copy-btn" onclick="copyToClipboard('1.3')">Copy Summary</button>
+            </article>
+            <article class="keypoint" id="keypoint-1.4">
+                <h3 class="keypoint-header">
+                    <span class="keypoint-id">1.4</span>
+                    <span class="keypoint-name">Route Definition in Configuration</span>
+                </h3>
+                <p class="summary">Every API route must be explicitly registered in config.json with its HTTP method, function name, file path, inputs, and expected outputs.</p>
+                <button class="copy-btn" onclick="copyToClipboard('1.4')">Copy Summary</button>
+            </article>
+            <article class="keypoint" id="keypoint-1.5">
+                <h3 class="keypoint-header">
+                    <span class="keypoint-id">1.5</span>
+                    <span class="keypoint-name">Environment Variables and .env</span>
+                </h3>
+                <p class="summary">Sensitive credentials like API keys must be stored in a .env file that is added to .gitignore to prevent accidental exposure.</p>
+                <button class="copy-btn" onclick="copyToClipboard('1.5')">Copy Summary</button>
+            </article>
+        </div>
+    </section>
+    <section class="doc-section" id="section-2">
+        <h2 class="section-header" onclick="toggleSection('section-2')">
+            <span class="section-toggle">▼</span>
+            <span class="section-title">2. BIST (Built-In Self Test) System</span>
+        </h2>
+        <div class="section-content" style="display: none;">
+            <article class="keypoint" id="keypoint-2.1">
+                <h3 class="keypoint-header">
+                    <span class="keypoint-id">2.1</span>
+                    <span class="keypoint-name">What is BIST?</span>
+                </h3>
+                <p class="summary">BIST is an automated testing framework that validates all endpoints, external dependencies, and dashboard pages are functional on server startup.</p>
+                <button class="copy-btn" onclick="copyToClipboard('2.1')">Copy Summary</button>
+            </article>
+            <article class="keypoint" id="keypoint-2.2">
+                <h3 class="keypoint-header">
+                    <span class="keypoint-id">2.2</span>
+                    <span class="keypoint-name">BIST Execution Flow</span>
+                </h3>
+                <p class="summary">BIST runs automatically after the server starts, testing each endpoint defined in config.json and verifying external API connectivity.</p>
+                <button class="copy-btn" onclick="copyToClipboard('2.2')">Copy Summary</button>
+            </article>
+            <article class="keypoint" id="keypoint-2.3">
+                <h3 class="keypoint-header">
+                    <span class="keypoint-id">2.3</span>
+                    <span class="keypoint-name">BIST Test Results</span>
+                </h3>
+                <p class="summary">Test results are saved to results/bist_results.json containing endpoint status, response codes, success/failure flags, and dependency connectivity.</p>
+                <button class="copy-btn" onclick="copyToClipboard('2.3')">Copy Summary</button>
+            </article>
+            <article class="keypoint" id="keypoint-2.4">
+                <h3 class="keypoint-header">
+                    <span class="keypoint-id">2.4</span>
+                    <span class="keypoint-name">Testing External Dependencies</span>
+                </h3>
+                <p class="summary">Each external API defined in config.json is tested to verify it's reachable and properly authenticated during BIST execution.</p>
+                <button class="copy-btn" onclick="copyToClipboard('2.4')">Copy Summary</button>
+            </article>
+            <article class="keypoint" id="keypoint-2.5">
+                <h3 class="keypoint-header">
+                    <span class="keypoint-id">2.5</span>
+                    <span class="keypoint-name">Dashboard Page Validation</span>
+                </h3>
+                <p class="summary">BIST validates that all required dashboard pages exist and render without errors before marking the server as healthy.</p>
+                <button class="copy-btn" onclick="copyToClipboard('2.5')">Copy Summary</button>
+            </article>
+        </div>
+    </section>
+    <section class="doc-section" id="section-3">
+        <h2 class="section-header" onclick="toggleSection('section-3')">
+            <span class="section-toggle">▼</span>
+            <span class="section-title">3. Lifecycle Management (start.sh and stop.sh)</span>
+        </h2>
+        <div class="section-content" style="display: none;">
+            <article class="keypoint" id="keypoint-3.1">
+                <h3 class="keypoint-header">
+                    <span class="keypoint-id">3.1</span>
+                    <span class="keypoint-name">start.sh: Server Startup Process</span>
+                </h3>
+                <p class="summary">The start.sh script reads configuration, checks ports, builds the Docker image, runs the container, saves the PID, and executes BIST tests.</p>
+                <button class="copy-btn" onclick="copyToClipboard('3.1')">Copy Summary</button>
+            </article>
+            <article class="keypoint" id="keypoint-3.2">
+                <h3 class="keypoint-header">
+                    <span class="keypoint-id">3.2</span>
+                    <span class="keypoint-name">Port Configuration in start.sh</span>
+                </h3>
+                <p class="summary">The script dynamically extracts root_port and port_offsets from config.json to map container ports to the configured host ports.</p>
+                <button class="copy-btn" onclick="copyToClipboard('3.2')">Copy Summary</button>
+            </article>
+            <article class="keypoint" id="keypoint-3.3">
+                <h3 class="keypoint-header">
+                    <span class="keypoint-id">3.3</span>
+                    <span class="keypoint-name">Docker Integration</span>
+                </h3>
+                <p class="summary">The start.sh script builds a Docker image and runs it as a container with proper port mapping and volume mounting for persistent storage.</p>
+                <button class="copy-btn" onclick="copyToClipboard('3.3')">Copy Summary</button>
+            </article>
+            <article class="keypoint" id="keypoint-3.4">
+                <h3 class="keypoint-header">
+                    <span class="keypoint-id">3.4</span>
+                    <span class="keypoint-name">Health Checking</span>
+                </h3>
+                <p class="summary">After startup, the script waits for the container to initialize, retrieves its PID, and saves it for monitoring and shutdown purposes.</p>
+                <button class="copy-btn" onclick="copyToClipboard('3.4')">Copy Summary</button>
+            </article>
+            <article class="keypoint" id="keypoint-3.5">
+                <h3 class="keypoint-header">
+                    <span class="keypoint-id">3.5</span>
+                    <span class="keypoint-name">stop.sh: Server Shutdown Process</span>
+                </h3>
+                <p class="summary">The stop.sh script reads the PID file, stops and removes the Docker container, and cleans up related files.</p>
+                <button class="copy-btn" onclick="copyToClipboard('3.5')">Copy Summary</button>
+            </article>
+            <article class="keypoint" id="keypoint-3.6">
+                <h3 class="keypoint-header">
+                    <span class="keypoint-id">3.6</span>
+                    <span class="keypoint-name">Graceful Shutdown</span>
+                </h3>
+                <p class="summary">The shutdown process cleanly stops the container before removal, allowing for any necessary cleanup operations.</p>
+                <button class="copy-btn" onclick="copyToClipboard('3.6')">Copy Summary</button>
+            </article>
+        </div>
+    </section>
+    <section class="doc-section" id="section-4">
+        <h2 class="section-header" onclick="toggleSection('section-4')">
+            <span class="section-toggle">▼</span>
+            <span class="section-title">4. Pages and Dashboard Structure</span>
+        </h2>
+        <div class="section-content" style="display: none;">
+            <article class="keypoint" id="keypoint-4.1">
+                <h3 class="keypoint-header">
+                    <span class="keypoint-id">4.1</span>
+                    <span class="keypoint-name">Three-Page Dashboard System</span>
+                </h3>
+                <p class="summary">The server includes main.html for status, events.html for request logs, and api_docs.html for interactive API documentation.</p>
+                <button class="copy-btn" onclick="copyToClipboard('4.1')">Copy Summary</button>
+            </article>
+            <article class="keypoint" id="keypoint-4.2">
+                <h3 class="keypoint-header">
+                    <span class="keypoint-id">4.2</span>
+                    <span class="keypoint-name">Dashboard Route Registration</span>
+                </h3>
+                <p class="summary">Dashboard routes are registered in ui/dashboard.py and map to template files in the templates/ directory.</p>
+                <button class="copy-btn" onclick="copyToClipboard('4.2')">Copy Summary</button>
+            </article>
+            <article class="keypoint" id="keypoint-4.3">
+                <h3 class="keypoint-header">
+                    <span class="keypoint-id">4.3</span>
+                    <span class="keypoint-name">Main Dashboard Page</span>
+                </h3>
+                <p class="summary">The main dashboard displays server name, port configuration, Docker image name, and links to other pages.</p>
+                <button class="copy-btn" onclick="copyToClipboard('4.3')">Copy Summary</button>
+            </article>
+            <article class="keypoint" id="keypoint-4.4">
+                <h3 class="keypoint-header">
+                    <span class="keypoint-id">4.4</span>
+                    <span class="keypoint-name">Events Page</span>
+                </h3>
+                <p class="summary">The events page shows the last 100 API requests and responses with timestamps, methods, payloads, status codes, and success indicators.</p>
+                <button class="copy-btn" onclick="copyToClipboard('4.4')">Copy Summary</button>
+            </article>
+            <article class="keypoint" id="keypoint-4.5">
+                <h3 class="keypoint-header">
+                    <span class="keypoint-id">4.5</span>
+                    <span class="keypoint-name">API Documentation Page</span>
+                </h3>
+                <p class="summary">The API docs page lists all endpoints with their methods, parameters, expected outputs, and provides an interactive request builder.</p>
+                <button class="copy-btn" onclick="copyToClipboard('4.5')">Copy Summary</button>
+            </article>
+            <article class="keypoint" id="keypoint-4.6">
+                <h3 class="keypoint-header">
+                    <span class="keypoint-id">4.6</span>
+                    <span class="keypoint-name">Template Extension</span>
+                </h3>
+                <p class="summary">Custom dashboard pages can be added by creating new HTML files in templates/ and registering routes in ui/dashboard.py.</p>
+                <button class="copy-btn" onclick="copyToClipboard('4.6')">Copy Summary</button>
+            </article>
+            <article class="keypoint" id="keypoint-4.7">
+                <h3 class="keypoint-header">
+                    <span class="keypoint-id">4.7</span>
+                    <span class="keypoint-name">Static Files Organization</span>
+                </h3>
+                <p class="summary">CSS and JavaScript files are organized in static/ with separate folders for css/ and js/ serving as static assets.</p>
+                <button class="copy-btn" onclick="copyToClipboard('4.7')">Copy Summary</button>
+            </article>
+        </div>
+    </section>
+    <section class="doc-section" id="section-5">
+        <h2 class="section-header" onclick="toggleSection('section-5')">
+            <span class="section-toggle">▼</span>
+            <span class="section-title">5. Function Organization and Conventions</span>
+        </h2>
+        <div class="section-content" style="display: none;">
+            <article class="keypoint" id="keypoint-5.1">
+                <h3 class="keypoint-header">
+                    <span class="keypoint-id">5.1</span>
+                    <span class="keypoint-name">Three Function Types</span>
+                </h3>
+                <p class="summary">Functions are categorized as public (no prefix), private (_prefix), or dependency (dep_prefix) with specific rules for each type.</p>
+                <button class="copy-btn" onclick="copyToClipboard('5.1')">Copy Summary</button>
+            </article>
+            <article class="keypoint" id="keypoint-5.2">
+                <h3 class="keypoint-header">
+                    <span class="keypoint-id">5.2</span>
+                    <span class="keypoint-name">Function Documentation Format</span>
+                </h3>
+                <p class="summary">Every public function must include a docstring with description, return type, route_test block, and internal_dependencies block.</p>
+                <button class="copy-btn" onclick="copyToClipboard('5.2')">Copy Summary</button>
+            </article>
+            <article class="keypoint" id="keypoint-5.3">
+                <h3 class="keypoint-header">
+                    <span class="keypoint-id">5.3</span>
+                    <span class="keypoint-name">Response Format Standard</span>
+                </h3>
+                <p class="summary">All endpoints must return success responses with {"success": true, "data": ...} and error responses with {"success": false, "error": "message"}.</p>
+                <button class="copy-btn" onclick="copyToClipboard('5.3')">Copy Summary</button>
+            </article>
+            <article class="keypoint" id="keypoint-5.4">
+                <h3 class="keypoint-header">
+                    <span class="keypoint-id">5.4</span>
+                    <span class="keypoint-name">Error Handling Pattern</span>
+                </h3>
+                <p class="summary">Every function must wrap logic in try-except blocks returning appropriate error responses with 500 status for unexpected errors.</p>
+                <button class="copy-btn" onclick="copyToClipboard('5.4')">Copy Summary</button>
+            </article>
+            <article class="keypoint" id="keypoint-5.5">
+                <h3 class="keypoint-header">
+                    <span class="keypoint-id">5.5</span>
+                    <span class="keypoint-name">Testing in Docstring</span>
+                </h3>
+                <p class="summary">The route_test block in docstrings specifies sample input data and expected output structure for BIST validation.</p>
+                <button class="copy-btn" onclick="copyToClipboard('5.5')">Copy Summary</button>
+            </article>
+            <article class="keypoint" id="keypoint-5.6">
+                <h3 class="keypoint-header">
+                    <span class="keypoint-id">5.6</span>
+                    <span class="keypoint-name">Dependency Declaration</span>
+                </h3>
+                <p class="summary">The internal_dependencies block lists all functions called by the current function for call chain tracing and circular dependency detection.</p>
+                <button class="copy-btn" onclick="copyToClipboard('5.6')">Copy Summary</button>
+            </article>
+        </div>
+    </section>
+    <section class="doc-section" id="section-6">
+        <h2 class="section-header" onclick="toggleSection('section-6')">
+            <span class="section-toggle">▼</span>
+            <span class="section-title">6. Event Logging System</span>
+        </h2>
+        <div class="section-content" style="display: none;">
+            <article class="keypoint" id="keypoint-6.1">
+                <h3 class="keypoint-header">
+                    <span class="keypoint-id">6.1</span>
+                    <span class="keypoint-name">Automatic Event Logging</span>
+                </h3>
+                <p class="summary">Every API request is automatically logged with timestamp, route, method, request/response data, status code, and execution time.</p>
+                <button class="copy-btn" onclick="copyToClipboard('6.1')">Copy Summary</button>
+            </article>
+            <article class="keypoint" id="keypoint-6.2">
+                <h3 class="keypoint-header">
+                    <span class="keypoint-id">6.2</span>
+                    <span class="keypoint-name">Event File Storage</span>
+                </h3>
+                <p class="summary">Events are stored as individual JSON files in storage/events/ with filenames formatted as TIMESTAMP_METHOD_ROUTE_STATUS.json.</p>
+                <button class="copy-btn" onclick="copyToClipboard('6.2')">Copy Summary</button>
+            </article>
+            <article class="keypoint" id="keypoint-6.3">
+                <h3 class="keypoint-header">
+                    <span class="keypoint-id">6.3</span>
+                    <span class="keypoint-name">Retrieving Event Logs</span>
+                </h3>
+                <p class="summary">Event logs are displayed in the Events dashboard page showing the last 100 requests in reverse chronological order.</p>
+                <button class="copy-btn" onclick="copyToClipboard('6.3')">Copy Summary</button>
+            </article>
+            <article class="keypoint" id="keypoint-6.4">
+                <h3 class="keypoint-header">
+                    <span class="keypoint-id">6.4</span>
+                    <span class="keypoint-name">Event Data Structure</span>
+                </h3>
+                <p class="summary">Each event JSON contains timestamp, route, method, request headers/body, response status/headers/body, and execution time.</p>
+                <button class="copy-btn" onclick="copyToClipboard('6.4')">Copy Summary</button>
+            </article>
+            <article class="keypoint" id="keypoint-6.5">
+                <h3 class="keypoint-header">
+                    <span class="keypoint-id">6.5</span>
+                    <span class="keypoint-name">Event Filtering and Search</span>
+                </h3>
+                <p class="summary">The Events page provides filtering by HTTP method, status code, route path, and success/failure status with CSV/JSON export options.</p>
+                <button class="copy-btn" onclick="copyToClipboard('6.5')">Copy Summary</button>
+            </article>
+        </div>
+    </section>
+    <section class="doc-section" id="section-7">
+        <h2 class="section-header" onclick="toggleSection('section-7')">
+            <span class="section-toggle">▼</span>
+            <span class="section-title">7. Docker Containerization</span>
+        </h2>
+        <div class="section-content" style="display: none;">
+            <article class="keypoint" id="keypoint-7.1">
+                <h3 class="keypoint-header">
+                    <span class="keypoint-id">7.1</span>
+                    <span class="keypoint-name">Dockerfile Structure</span>
+                </h3>
+                <p class="summary">The Dockerfile defines the base image, working directory, dependencies, exposed ports, and startup command.</p>
+                <button class="copy-btn" onclick="copyToClipboard('7.1')">Copy Summary</button>
+            </article>
+            <article class="keypoint" id="keypoint-7.2">
+                <h3 class="keypoint-header">
+                    <span class="keypoint-id">7.2</span>
+                    <span class="keypoint-name">Image Naming Convention</span>
+                </h3>
+                <p class="summary">The Docker image is named in config.json using the format project-name:latest with the container name derived by appending _container.</p>
+                <button class="copy-btn" onclick="copyToClipboard('7.2')">Copy Summary</button>
+            </article>
+            <article class="keypoint" id="keypoint-7.3">
+                <h3 class="keypoint-header">
+                    <span class="keypoint-id">7.3</span>
+                    <span class="keypoint-name">Volume Mounting</span>
+                </h3>
+                <p class="summary">The start.sh script mounts the local storage/ folder to /app/storage allowing persistent event logs and easy host access.</p>
+                <button class="copy-btn" onclick="copyToClipboard('7.3')">Copy Summary</button>
+            </article>
+            <article class="keypoint" id="keypoint-7.4">
+                <h3 class="keypoint-header">
+                    <span class="keypoint-id">7.4</span>
+                    <span class="keypoint-name">Port Mapping</span>
+                </h3>
+                <p class="summary">Docker maps container port 8000 to the configured root_port for the dashboard and port 8001 to root_port + 1 for the API.</p>
+                <button class="copy-btn" onclick="copyToClipboard('7.4')">Copy Summary</button>
+            </article>
+            <article class="keypoint" id="keypoint-7.5">
+                <h3 class="keypoint-header">
+                    <span class="keypoint-id">7.5</span>
+                    <span class="keypoint-name">Environment Variables in Container</span>
+                </h3>
+                <p class="summary">The Dockerfile can set default environment variables, and runtime variables from .env are made available to the Flask application.</p>
+                <button class="copy-btn" onclick="copyToClipboard('7.5')">Copy Summary</button>
+            </article>
+        </div>
+    </section>
+    <section class="doc-section" id="section-8">
+        <h2 class="section-header" onclick="toggleSection('section-8')">
+            <span class="section-toggle">▼</span>
+            <span class="section-title">8. Project Structure and File Organization</span>
+        </h2>
+        <div class="section-content" style="display: none;">
+            <article class="keypoint" id="keypoint-8.1">
+                <h3 class="keypoint-header">
+                    <span class="keypoint-id">8.1</span>
+                    <span class="keypoint-name">Modifiable vs Restricted Files</span>
+                </h3>
+                <p class="summary">Users modify config.json, functions/, requirements.txt, templates/, and .env but should not modify app.py, utils/, tests/, Dockerfile, or scripts.</p>
+                <button class="copy-btn" onclick="copyToClipboard('8.1')">Copy Summary</button>
+            </article>
+            <article class="keypoint" id="keypoint-8.2">
+                <h3 class="keypoint-header">
+                    <span class="keypoint-id">8.2</span>
+                    <span class="keypoint-name">Directory Tree</span>
+                </h3>
+                <p class="summary">The project is organized with config at the root, user code in functions/ and templates/, internal code in utils/ and tests/, and runtime data in storage/.</p>
+                <button class="copy-btn" onclick="copyToClipboard('8.2')">Copy Summary</button>
+            </article>
+        </div>
+    </section>
+    <section class="doc-section" id="section-9">
+        <h2 class="section-header" onclick="toggleSection('section-9')">
+            <span class="section-toggle">▼</span>
+            <span class="section-title">9. Adding New Endpoints</span>
+        </h2>
+        <div class="section-content" style="display: none;">
+            <article class="keypoint" id="keypoint-9.1">
+                <h3 class="keypoint-header">
+                    <span class="keypoint-id">9.1</span>
+                    <span class="keypoint-name">Complete Endpoint Addition Workflow</span>
+                </h3>
+                <p class="summary">Adding endpoints involves creating a function file, implementing the function, registering it in config.json, updating requirements.txt, and restarting.</p>
+                <button class="copy-btn" onclick="copyToClipboard('9.1')">Copy Summary</button>
+            </article>
+            <article class="keypoint" id="keypoint-9.2">
+                <h3 class="keypoint-header">
+                    <span class="keypoint-id">9.2</span>
+                    <span class="keypoint-name">Function File Creation</span>
+                </h3>
+                <p class="summary">New endpoint files should be created in functions/ with the required function format, documentation, error handling, and return tuple.</p>
+                <button class="copy-btn" onclick="copyToClipboard('9.2')">Copy Summary</button>
+            </article>
+            <article class="keypoint" id="keypoint-9.3">
+                <h3 class="keypoint-header">
+                    <span class="keypoint-id">9.3</span>
+                    <span class="keypoint-name">Configuration Registration</span>
+                </h3>
+                <p class="summary">Each route must be registered in config.json under api_details.routes with method, function name, file path, input parameters, and outputs.</p>
+                <button class="copy-btn" onclick="copyToClipboard('9.3')">Copy Summary</button>
+            </article>
+            <article class="keypoint" id="keypoint-9.4">
+                <h3 class="keypoint-header">
+                    <span class="keypoint-id">9.4</span>
+                    <span class="keypoint-name">Testing New Endpoints</span>
+                </h3>
+                <p class="summary">After restarting, new endpoints appear in the API docs page and can be tested via the interactive builder or by checking event logs.</p>
+                <button class="copy-btn" onclick="copyToClipboard('9.4')">Copy Summary</button>
+            </article>
+        </div>
+    </section>
+    <section class="doc-section" id="section-10">
+        <h2 class="section-header" onclick="toggleSection('section-10')">
+            <span class="section-toggle">▼</span>
+            <span class="section-title">10. External API Integration</span>
+        </h2>
+        <div class="section-content" style="display: none;">
+            <article class="keypoint" id="keypoint-10.1">
+                <h3 class="keypoint-header">
+                    <span class="keypoint-id">10.1</span>
+                    <span class="keypoint-name">Integrating External Services</span>
+                </h3>
+                <p class="summary">External APIs are defined in config.json under external_dependencies with base URL, required headers, and timeout settings.</p>
+                <button class="copy-btn" onclick="copyToClipboard('10.1')">Copy Summary</button>
+            </article>
+            <article class="keypoint" id="keypoint-10.2">
+                <h3 class="keypoint-header">
+                    <span class="keypoint-id">10.2</span>
+                    <span class="keypoint-name">Dependency Functions</span>
+                </h3>
+                <p class="summary">Create functions with dep_ prefix to call external APIs, and they should handle authentication, retries, and error recovery.</p>
+                <button class="copy-btn" onclick="copyToClipboard('10.2')">Copy Summary</button>
+            </article>
+            <article class="keypoint" id="keypoint-10.3">
+                <h3 class="keypoint-header">
+                    <span class="keypoint-id">10.3</span>
+                    <span class="keypoint-name">Error Recovery in Dependencies</span>
+                </h3>
+                <p class="summary">Dependency functions should implement retry logic, timeout handling, auth error recovery, rate limiting awareness, and fallbacks.</p>
+                <button class="copy-btn" onclick="copyToClipboard('10.3')">Copy Summary</button>
+            </article>
+            <article class="keypoint" id="keypoint-10.4">
+                <h3 class="keypoint-header">
+                    <span class="keypoint-id">10.4</span>
+                    <span class="keypoint-name">Testing External Dependencies</span>
+                </h3>
+                <p class="summary">BIST automatically tests external dependencies by making test requests and verifying connectivity, authentication, and response status.</p>
+                <button class="copy-btn" onclick="copyToClipboard('10.4')">Copy Summary</button>
+            </article>
+        </div>
+    </section>
+    <section class="doc-section" id="section-11">
+        <h2 class="section-header" onclick="toggleSection('section-11')">
+            <span class="section-toggle">▼</span>
+            <span class="section-title">11. Development and Deployment Workflow</span>
+        </h2>
+        <div class="section-content" style="display: none;">
+            <article class="keypoint" id="keypoint-11.1">
+                <h3 class="keypoint-header">
+                    <span class="keypoint-id">11.1</span>
+                    <span class="keypoint-name">Development Environment</span>
+                </h3>
+                <p class="summary">For local development without Docker, create a virtual environment, install requirements, and run python app.py directly.</p>
+                <button class="copy-btn" onclick="copyToClipboard('11.1')">Copy Summary</button>
+            </article>
+            <article class="keypoint" id="keypoint-11.2">
+                <h3 class="keypoint-header">
+                    <span class="keypoint-id">11.2</span>
+                    <span class="keypoint-name">Local Testing Workflow</span>
+                </h3>
+                <p class="summary">Development involves modifying code, updating config, restarting, testing via API docs, and reviewing event logs and BIST results.</p>
+                <button class="copy-btn" onclick="copyToClipboard('11.2')">Copy Summary</button>
+            </article>
+            <article class="keypoint" id="keypoint-11.3">
+                <h3 class="keypoint-header">
+                    <span class="keypoint-id">11.3</span>
+                    <span class="keypoint-name">Production Checklist</span>
+                </h3>
+                <p class="summary">Before production deployment, verify all routes are configured, functions created, dependencies added, credentials set, and tests pass.</p>
+                <button class="copy-btn" onclick="copyToClipboard('11.3')">Copy Summary</button>
+            </article>
+            <article class="keypoint" id="keypoint-11.4">
+                <h3 class="keypoint-header">
+                    <span class="keypoint-id">11.4</span>
+                    <span class="keypoint-name">Deployment Steps</span>
+                </h3>
+                <p class="summary">Production deployment involves building the Docker image, tagging for the registry, pushing to registry, updating config, and running start.sh.</p>
+                <button class="copy-btn" onclick="copyToClipboard('11.4')">Copy Summary</button>
+            </article>
+        </div>
+    </section>
+    <section class="doc-section" id="section-12">
+        <h2 class="section-header" onclick="toggleSection('section-12')">
+            <span class="section-toggle">▼</span>
+            <span class="section-title">12. Troubleshooting and Debugging</span>
+        </h2>
+        <div class="section-content" style="display: none;">
+            <article class="keypoint" id="keypoint-12.1">
+                <h3 class="keypoint-header">
+                    <span class="keypoint-id">12.1</span>
+                    <span class="keypoint-name">Common Issues and Solutions</span>
+                </h3>
+                <p class="summary">Common issues include port conflicts, missing config.json, function not found errors, and BIST failures, each with specific solutions.</p>
+                <button class="copy-btn" onclick="copyToClipboard('12.1')">Copy Summary</button>
+            </article>
+            <article class="keypoint" id="keypoint-12.2">
+                <h3 class="keypoint-header">
+                    <span class="keypoint-id">12.2</span>
+                    <span class="keypoint-name">Debugging Techniques</span>
+                </h3>
+                <p class="summary">Debugging involves viewing container logs, accessing container shell, checking event logs, monitoring BIST results, or running locally.</p>
+                <button class="copy-btn" onclick="copyToClipboard('12.2')">Copy Summary</button>
+            </article>
+            <article class="keypoint" id="keypoint-12.3">
+                <h3 class="keypoint-header">
+                    <span class="keypoint-id">12.3</span>
+                    <span class="keypoint-name">Log Locations</span>
+                </h3>
+                <p class="summary">Flask logs appear in Docker container output, event logs in storage/events/, BIST results in results/bist_results.json, and PID in storage/server.pid.</p>
+                <button class="copy-btn" onclick="copyToClipboard('12.3')">Copy Summary</button>
+            </article>
+        </div>
+    </section>
+    <section class="doc-section" id="section-13">
+        <h2 class="section-header" onclick="toggleSection('section-13')">
+            <span class="section-toggle">▼</span>
+            <span class="section-title">13. Configuration Reference</span>
+        </h2>
+        <div class="section-content" style="display: none;">
+            <article class="keypoint" id="keypoint-13.1">
+                <h3 class="keypoint-header">
+                    <span class="keypoint-id">13.1</span>
+                    <span class="keypoint-name">Configuration Parameters</span>
+                </h3>
+                <p class="summary">Key configuration parameters include root_port, port_offsets, local_storage_folder, docker_image, and individual route properties.</p>
+                <button class="copy-btn" onclick="copyToClipboard('13.1')">Copy Summary</button>
+            </article>
+            <article class="keypoint" id="keypoint-13.2">
+                <h3 class="keypoint-header">
+                    <span class="keypoint-id">13.2</span>
+                    <span class="keypoint-name">Environment Variables</span>
+                </h3>
+                <p class="summary">Sensitive information like API_KEY, EXTERNAL_API_URL, and DATABASE_URL should be stored in .env files never committed to version control.</p>
+                <button class="copy-btn" onclick="copyToClipboard('13.2')">Copy Summary</button>
+            </article>
+        </div>
+    </section>
+    <section class="doc-section" id="section-14">
+        <h2 class="section-header" onclick="toggleSection('section-14')">
+            <span class="section-toggle">▼</span>
+            <span class="section-title">14. Performance Optimization</span>
+        </h2>
+        <div class="section-content" style="display: none;">
+            <article class="keypoint" id="keypoint-14.1">
+                <h3 class="keypoint-header">
+                    <span class="keypoint-id">14.1</span>
+                    <span class="keypoint-name">Response Optimization</span>
+                </h3>
+                <p class="summary">Optimize responses by returning only necessary data, implementing pagination, caching frequently accessed data, and minimizing JSON payloads.</p>
+                <button class="copy-btn" onclick="copyToClipboard('14.1')">Copy Summary</button>
+            </article>
+            <article class="keypoint" id="keypoint-14.2">
+                <h3 class="keypoint-header">
+                    <span class="keypoint-id">14.2</span>
+                    <span class="keypoint-name">Scaling Considerations</span>
+                </h3>
+                <p class="summary">For scaling, use connection pooling, implement rate limiting, consider load balancing, and monitor response times via event logs.</p>
+                <button class="copy-btn" onclick="copyToClipboard('14.2')">Copy Summary</button>
+            </article>
+        </div>
+    </section>
+    <section class="doc-section" id="section-15">
+        <h2 class="section-header" onclick="toggleSection('section-15')">
+            <span class="section-toggle">▼</span>
+            <span class="section-title">15. Security Best Practices</span>
+        </h2>
+        <div class="section-content" style="display: none;">
+            <article class="keypoint" id="keypoint-15.1">
+                <h3 class="keypoint-header">
+                    <span class="keypoint-id">15.1</span>
+                    <span class="keypoint-name">Credential Management</span>
+                </h3>
+                <p class="summary">Never hardcode credentials, use .env files, add .env to .gitignore, rotate credentials regularly, and maintain environment-specific configs.</p>
+                <button class="copy-btn" onclick="copyToClipboard('15.1')">Copy Summary</button>
+            </article>
+            <article class="keypoint" id="keypoint-15.2">
+                <h3 class="keypoint-header">
+                    <span class="keypoint-id">15.2</span>
+                    <span class="keypoint-name">Input Validation</span>
+                </h3>
+                <p class="summary">Validate all request parameters, use type hints, check request.is_json, and return 400 Bad Request for invalid inputs.</p>
+                <button class="copy-btn" onclick="copyToClipboard('15.2')">Copy Summary</button>
+            </article>
+            <article class="keypoint" id="keypoint-15.3">
+                <h3 class="keypoint-header">
+                    <span class="keypoint-id">15.3</span>
+                    <span class="keypoint-name">Output Sanitization</span>
+                </h3>
+                <p class="summary">Avoid exposing internal error details, log full errors internally while returning generic messages, and remove sensitive data from logs.</p>
+                <button class="copy-btn" onclick="copyToClipboard('15.3')">Copy Summary</button>
+            </article>
+        </div>
+    </section>
+
+    </main>
+
+    <footer>
+        <p>Generated on 2026-02-01 00:15:41</p>
+        <p>Project: Base Server Project Keypoints v1.0.0</p>
+    </footer>
+
+    <script>
+
+        // Collapse/Expand functionality
+        function toggleSection(sectionId) {
+            const section = document.getElementById(sectionId);
+            const header = section.querySelector('.section-header');
+            const content = section.querySelector('.section-content');
+            const toggle = header.querySelector('.section-toggle');
+
+            const isHidden = content.style.display === 'none';
+            content.style.display = isHidden ? 'block' : 'none';
+            toggle.classList.toggle('collapsed', !isHidden);
+
+            // Save state
+            localStorage.setItem(sectionId, isHidden ? 'open' : 'closed');
+        }
+
+        // Load saved state on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.doc-section').forEach(section => {
+                const sectionId = section.id;
+                const state = localStorage.getItem(sectionId);
+                const content = section.querySelector('.section-content');
+                const toggle = section.querySelector('.section-toggle');
+
+                if (state === 'closed') {
+                    content.style.display = 'none';
+                    toggle.classList.add('collapsed');
+                }
+            });
+        });
+
+        // Copy to clipboard
+        function copyToClipboard(keypointId) {
+            const article = document.getElementById('keypoint-' + keypointId);
+            const summary = article.querySelector('.summary').textContent;
+
+            navigator.clipboard.writeText(summary).then(() => {
+                const btn = article.querySelector('.copy-btn');
+                const original = btn.textContent;
+                btn.textContent = '✓ Copied!';
+                setTimeout(() => {
+                    btn.textContent = original;
+                }, 2000);
+            });
+        }
+
+        // Theme toggle
+        function toggleTheme() {
+            const html = document.documentElement;
+            const isDark = html.classList.contains('theme-dark');
+            const newTheme = isDark ? 'light' : 'dark';
+
+            html.className = 'theme-' + newTheme;
+            localStorage.setItem('theme', newTheme);
+
+            const btn = document.getElementById('theme-toggle');
+            btn.textContent = newTheme === 'dark' ? '☀️ Theme' : '🌙 Theme';
+        }
+
+        // Load theme preference
+        document.addEventListener('DOMContentLoaded', function() {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            const html = document.documentElement;
+            html.className = 'theme-' + savedTheme;
+            const btn = document.getElementById('theme-toggle');
+            if (btn) {
+                btn.textContent = savedTheme === 'dark' ? '☀️ Theme' : '🌙 Theme';
+            }
+        });
+
+        // Export as JSON
+        function exportAsJSON() {
+            const data = {};
+            document.querySelectorAll('.doc-section').forEach(section => {
+                const sectionId = section.id.replace('section-', '');
+                const keypoints = [];
+
+                section.querySelectorAll('.keypoint').forEach(kp => {
+                    keypoints.push({
+                        id: kp.id.replace('keypoint-', ''),
+                        name: kp.querySelector('.keypoint-name').textContent,
+                        summary: kp.querySelector('.summary').textContent
+                    });
+                });
+
+                data[sectionId] = keypoints;
+            });
+
+            const json = JSON.stringify(data, null, 2);
+            const blob = new Blob([json], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'documentation-' + new Date().toISOString().split('T')[0] + '.json';
+            a.click();
+        }
+
+        // Search functionality
+        function searchDocumentation() {
+            const query = document.getElementById('search-input').value.toLowerCase();
+            let matchCount = 0;
+
+            document.querySelectorAll('.doc-section').forEach(section => {
+                let sectionHasMatch = false;
+                let anyKeypointVisible = false;
+
+                section.querySelectorAll('.keypoint').forEach(keypoint => {
+                    const name = keypoint.querySelector('.keypoint-name').textContent.toLowerCase();
+                    const summary = keypoint.querySelector('.summary').textContent.toLowerCase();
+
+                    const isMatch = query === '' || name.includes(query) || summary.includes(query);
+                    keypoint.style.display = isMatch ? 'block' : 'none';
+
+                    if (isMatch) {
+                        sectionHasMatch = true;
+                        anyKeypointVisible = true;
+                        matchCount++;
+                    }
+                });
+
+                section.style.display = anyKeypointVisible ? 'block' : 'none';
+
+                // Auto-expand section if it has matches
+                if (sectionHasMatch && query !== '') {
+                    const content = section.querySelector('.section-content');
+                    if (content.style.display === 'none') {
+                        content.style.display = 'block';
+                        const toggle = section.querySelector('.section-toggle');
+                        toggle.classList.remove('collapsed');
+                    }
+                }
+            });
+
+            // Update match count
+            const countEl = document.getElementById('search-count');
+            if (countEl) {
+                countEl.textContent = query ? `${matchCount} results` : '';
+            }
+        }
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,74 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Documentation Creation Guidelines Summary Schema",
+  "description": "Schema for validating documentation creation guidelines summary JSON (without descriptions)",
+  "type": "object",
+  "properties": {
+    "project": {
+      "type": "string",
+      "description": "Project or component name"
+    },
+    "version": {
+      "type": "string",
+      "description": "Semantic version (X.Y.Z format)",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$"
+    },
+    "sections": {
+      "type": "array",
+      "description": "Array of documentation sections",
+      "minItems": 1,
+      "maxItems": 15,
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "Section number (1-15)",
+            "minimum": 1,
+            "maximum": 15
+          },
+          "name": {
+            "type": "string",
+            "description": "Section title",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "keypoints": {
+            "type": "array",
+            "description": "Array of keypoints within this section",
+            "minItems": 3,
+            "maxItems": 5,
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "description": "Keypoint ID in X.Y format",
+                  "pattern": "^\\d+\\.\\d+$"
+                },
+                "name": {
+                  "type": "string",
+                  "description": "Keypoint title",
+                  "minLength": 1,
+                  "maxLength": 100
+                },
+                "summary": {
+                  "type": "string",
+                  "description": "One-sentence summary",
+                  "minLength": 1,
+                  "maxLength": 200
+                }
+              },
+              "required": ["id", "name", "summary"],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": ["id", "name", "keypoints"],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": ["project", "version", "sections"],
+  "additionalProperties": false
+}
