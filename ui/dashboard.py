@@ -1,6 +1,6 @@
 """Dashboard UI routes and logic."""
 
-from flask import Blueprint, render_template, jsonify, send_from_directory, request
+from flask import Blueprint, render_template, jsonify
 from pathlib import Path
 from typing import Dict, Any
 from utils.event_logger import get_recent_events

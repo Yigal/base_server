@@ -11,7 +11,7 @@
     </div>
 
     <div class="api-info">
-        <span class="api-base-url">Base URL: http://localhost:8001</span>
+        <span class="api-base-url">Base URL: http://localhost:{{ config.run_details.root_port + config.run_details.port_offsets.api }}</span>
         <span class="api-version">Version: 1.0.0</span>
     </div>
 
@@ -37,6 +37,9 @@
 
 
 <script>
+const API_PORT = {{ config.run_details.root_port + config.run_details.port_offsets.api }};
+const API_BASE_URL = `http://localhost:${API_PORT}`;
+
 async function fetchDocumentation() {
     const container = document.getElementById('docsContainer');
     const statusEl = document.getElementById('docsStatus');
@@ -47,7 +50,7 @@ async function fetchDocumentation() {
     container.innerHTML = '<p class="loading">Loading...</p>';
 
     try {
-        const response = await fetch('http://localhost:8001/api/documentation');
+        const response = await fetch(`${API_BASE_URL}/api/documentation`);
 
         if (!response.ok) {
             throw new Error(`HTTP ${response.status}: ${response.statusText}`);
@@ -91,7 +94,7 @@ async function fetchDocumentation() {
             <div class="error-message">
                 <strong>Error loading documentation:</strong><br>
                 ${error.message}<br><br>
-                <small>Make sure the FastAPI server is running on port 8001</small>
+                <small>Make sure the FastAPI server is running on port ${API_PORT}</small>
             </div>
         `;
         statusEl.textContent = '✗ Failed to load';

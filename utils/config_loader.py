@@ -27,23 +27,3 @@ def load_config(config_path: Path) -> Dict[str, Any]:
         config = json.load(f)
 
     return config
-
-
-def get_route_config(config: Dict[str, Any], route_name: str) -> Dict[str, Any]:
-    """
-    Get a specific route configuration.
-
-    Args:
-        config (Dict[str, Any]): Full configuration dictionary
-        route_name (str): Name of the route
-
-    Returns:
-        Dict[str, Any]: Route configuration
-
-    Examples:
-        >>> route = get_route_config(config, 'health_check')
-        >>> route['route']
-        '/api/health'
-    """
-    routes = config.get('api_details', {}).get('routes', {})
-    return routes.get(route_name, {})
