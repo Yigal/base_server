@@ -5,8 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Server Dashboard{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('ui.static', filename='css/style.css') }}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <link rel="stylesheet" href="{{ url_for('ui.static', filename='css/components.css') }}">
 </head>
 <body>
     <div class="sidebar">
@@ -32,6 +31,8 @@
         </div>
     </div>
 
+    <script src="{{ url_for('ui.static', filename='js/utils.js') }}"></script>
+    <script src="{{ url_for('ui.static', filename='js/events.js') }}"></script>
     <script src="{{ url_for('ui.static', filename='js/main.js') }}"></script>
 </body>
 </html>
